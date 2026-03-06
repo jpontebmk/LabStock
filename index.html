@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LabStock — Gestión de Insumos</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f2f1ed;--surface:#fff;--surface2:#f7f6f2;--border:#dddbd3;--border2:#edecea;
+  --text:#181814;--mid:#5c5c50;--dim:#9c9c88;
+  --accent:#6b3fa0;--accent-l:#f0eaf8;--accent-d:#52308a;
+  --red:#c0392b;--red-l:#fdf0ee;--amber:#c07800;--amber-l:#fdf6e3;
+  --blue:#1a4a8a;--blue-l:#eaf0fb;
+  --shadow:0 1px 3px rgba(0,0,0,.07),0 4px 12px rgba(0,0,0,.04);
+  --shadow-lg:0 8px 30px rgba(0,0,0,.12);
+}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;min-height:100vh;font-size:14px}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:0}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:48px 40px;text-align:center;box-shadow:var(--shadow-lg);max-width:380px;width:100%}
+.login-logo{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;color:var(--accent);letter-spacing:-1px;margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--dim);margin-bottom:32px}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:12px 20px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s}
+.btn-google:hover{background:var(--surface2);border-color:var(--accent)}
+.btn-google svg{flex-shrink:0}
+.login-note{font-size:11px;color:var(--dim);margin-top:16px}
+#login-status{font-size:12px;color:var(--dim);margin-top:12px;min-height:18px}
+
+/* SHELL */
+.shell{display:flex;min-height:100vh}
+#app{display:none}
+
+/* SIDEBAR */
+.sidebar{width:230px;background:#120e1a;color:#b8bcb9;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh}
+.sidebar-brand{padding:24px 20px 20px;border-bottom:1px solid #261d33}
+.brand-label{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:#fff;letter-spacing:-0.5px}
+.brand-sub{font-size:11px;color:#5a6058;margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
+.sidebar-nav{padding:16px 12px;flex:1}
+.nav-section-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#3a2e4a;padding:0 8px;margin:16px 0 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;cursor:pointer;transition:all .15s;color:#8a9088;font-size:13px;font-weight:400;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:#1e1a23;color:#d0d4d1}
+.nav-item.active{background:#2d1f42;color:#b98ee8;font-weight:500}
+.nav-icon{width:18px;height:18px;flex-shrink:0;opacity:.7}
+.nav-item.active .nav-icon{opacity:1}
+.sidebar-footer{padding:16px 20px;border-top:1px solid #261d33}
+.user-chip{display:flex;align-items:center;gap:10px}
+.user-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.user-avatar-placeholder{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6b3fa0,#9b6dd0);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex-shrink:0}
+.user-name{font-size:12px;color:#c0bcc8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.user-email{font-size:10px;color:#4a4e4b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-logout{margin-top:8px;width:100%;padding:6px;border:1px solid #261d33;border-radius:5px;background:none;color:#4a4e4b;font-size:11px;cursor:pointer;transition:all .15s;font-family:'IBM Plex Sans',sans-serif}
+.btn-logout:hover{background:#1e1a23;color:#8a8090}
+
+/* MAIN */
+.main{flex:1;overflow-x:hidden}
+.page{display:none;padding:32px 36px;animation:fadeIn .2s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.page-header{margin-bottom:28px;display:flex;align-items:flex-start;justify-content:space-between}
+.page-header-left{}
+.page-title{font-size:22px;font-weight:600;color:var(--text);letter-spacing:-.3px}
+.page-desc{font-size:13px;color:var(--mid);margin-top:4px}
+
+/* SYNC INDICATOR */
+.sync-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--border);border-radius:6px;background:var(--surface);font-size:12px;font-weight:500;color:var(--mid);cursor:pointer;transition:all .15s;font-family:'IBM Plex Sans',sans-serif}
+.sync-btn:hover{background:var(--surface2)}
+.sync-btn.syncing{color:var(--accent);border-color:var(--accent)}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--dim);flex-shrink:0}
+.sync-btn.syncing .sync-dot{background:var(--accent);animation:pulse-dot 1s infinite}
+.sync-btn.ok .sync-dot{background:#2ecc71}
+.sync-btn.error .sync-dot{background:var(--red)}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px;box-shadow:var(--shadow)}
+.card+.card{margin-top:16px}
+.card-title{font-size:13px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:.8px;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';width:3px;height:14px;border-radius:2px;background:var(--accent);flex-shrink:0}
+
+/* FORM */
+.form-grid{display:grid;gap:16px}
+.form-grid.cols2{grid-template-columns:1fr 1fr}
+.form-grid.cols3{grid-template-columns:1fr 1fr 1fr}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:12px;font-weight:500;color:var(--mid);letter-spacing:.3px}
+.field input,.field select{padding:9px 12px;border:1px solid var(--border);border-radius:6px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--text);background:var(--surface);transition:border-color .15s,box-shadow .15s;outline:none}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-l)}
+.field .hint{font-size:11px;color:var(--dim);margin-top:2px}
+.field-wrap{position:relative}
+
+/* ALTA AUTOCOMPLETE */
+.alta-ac-list{position:absolute;top:calc(100%+2px);left:0;right:0;background:var(--surface);border:1px solid var(--accent);border-radius:6px;box-shadow:var(--shadow-lg);z-index:200;display:none;max-height:200px;overflow-y:auto}
+.alta-ac-list.show{display:block}
+.alta-ac-item{padding:9px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border2);transition:background .1s}
+.alta-ac-item:last-child{border-bottom:none}
+.alta-ac-item:hover,.alta-ac-item:focus{background:var(--accent-l)}
+.alta-ac-item .ai-main{font-weight:500;color:var(--text)}
+.alta-ac-item .ai-sub{font-size:11px;color:var(--dim);margin-top:2px}
+.autofilled{border-color:var(--accent)!important;background:var(--accent-l)!important;transition:all .3s}
+.autofill-tag{font-size:10px;color:var(--accent);font-weight:600;letter-spacing:.3px;margin-top:3px;display:none}
+.autofill-tag.show{display:block}
+
+/* PREVIEW TABLE */
+.preview-table-wrap{overflow-x:auto}
+.preview-table{width:100%;border-collapse:collapse;font-size:13px}
+.preview-table th{background:var(--surface2);padding:8px 12px;text-align:left;font-weight:500;color:var(--mid);font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--border)}
+.preview-table td{padding:9px 12px;border-bottom:1px solid var(--border2);color:var(--text)}
+.preview-table tr:last-child td{border-bottom:none}
+.preview-row-new td{background:#f7f2fd}
+.lote-badge{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--blue-l);color:var(--blue);padding:2px 7px;border-radius:4px;font-weight:600}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:7px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--accent-d)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover:not(:disabled){background:#a93225}
+.btn-ghost{background:transparent;color:var(--mid);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--surface2);color:var(--text)}
+.btn-row{display:flex;gap:10px;margin-top:20px;align-items:center}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.3px}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.badge-disponible{background:var(--accent-l);color:var(--accent)}
+.badge-disponible::before{background:var(--accent)}
+.badge-baja{background:var(--red-l);color:var(--red)}
+.badge-baja::before{background:var(--red)}
+.badge-vence{background:var(--amber-l);color:var(--amber)}
+.badge-vence::before{background:var(--amber)}
+.badge-vencido{background:#2a1a1a;color:#e05050}
+.badge-vencido::before{background:#e05050}
+
+/* YEAR TABS */
+.year-tabs-bar{display:flex;align-items:center;gap:0;margin-bottom:20px;border-bottom:2px solid var(--border);overflow-x:auto}
+.year-tab{padding:8px 18px;font-size:13px;font-weight:500;color:var(--dim);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.year-tab:hover{color:var(--text)}
+.year-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.year-tab .tab-count{font-size:10px;background:var(--surface2);color:var(--dim);padding:1px 6px;border-radius:10px}
+.year-tab.active .tab-count{background:var(--accent-l);color:var(--accent)}
+
+/* SEARCH */
+.search-wrap{position:relative;width:100%}
+.search-input{width:100%;padding:11px 14px 11px 40px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'IBM Plex Sans',sans-serif;outline:none;transition:all .15s;background:var(--surface)}
+.search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-l)}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none}
+.autocomplete-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow-lg);z-index:100;max-height:240px;overflow-y:auto;display:none}
+.autocomplete-list.show{display:block}
+.autocomplete-item{padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border2);transition:background .1s}
+.autocomplete-item:last-child{border-bottom:none}
+.autocomplete-item:hover{background:var(--accent-l)}
+.autocomplete-item .ac-main{font-weight:500}
+.autocomplete-item .ac-sub{font-size:11px;color:var(--dim);margin-top:1px}
+.ac-highlight{color:var(--accent);font-weight:600}
+
+/* FILTER */
+.filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:5px 13px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:12px;font-weight:500;color:var(--mid);cursor:pointer;transition:all .15s}
+.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.filter-btn:hover:not(.active){background:var(--surface2)}
+
+/* TABLES */
+.results-table{width:100%;border-collapse:collapse;font-size:13px}
+.results-table th{background:var(--surface2);padding:9px 12px;text-align:left;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mid);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:1}
+.results-table td{padding:10px 12px;border-bottom:1px solid var(--border2);vertical-align:middle}
+.results-table tr.row-disponible:hover td{background:#f7f2fd}
+.results-table tr.row-baja td{opacity:.7}
+.results-table tr.row-baja:hover td{background:var(--red-l);opacity:1}
+.table-wrap{max-height:460px;overflow-y:auto;border:1px solid var(--border);border-radius:8px}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:12px}
+
+/* BAJA */
+.baja-results{margin-top:16px;display:none}
+.baja-results.show{display:block}
+.insumo-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;background:var(--surface);margin-bottom:8px}
+.insumo-row:hover{border-color:var(--accent);background:var(--accent-l)}
+.insumo-row.selected{border-color:var(--accent);background:var(--accent-l);box-shadow:0 0 0 3px rgba(107,63,160,.15)}
+.insumo-row-icon{width:36px;height:36px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.insumo-row-info{flex:1;min-width:0}
+.insumo-row-name{font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.insumo-row-meta{font-size:11px;color:var(--dim);margin-top:2px;display:flex;gap:12px;flex-wrap:wrap}
+.check-circle{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);background:var(--surface);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.insumo-row.selected .check-circle{border-color:var(--accent);background:var(--accent)}
+.check-icon{display:none;color:#fff;font-size:10px;font-weight:700}
+.insumo-row.selected .check-icon{display:block}
+.baja-form{display:none;margin-top:16px}
+.baja-form.show{display:block}
+.selected-tag{display:inline-flex;align-items:center;gap:8px;background:var(--accent-l);border:1px solid rgba(107,63,160,.2);color:var(--accent);padding:6px 12px;border-radius:6px;font-size:13px;font-weight:500;margin-bottom:16px}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;box-shadow:var(--shadow)}
+.stat-value{font-size:28px;font-weight:600;letter-spacing:-1px;line-height:1}
+.stat-label{font-size:11px;color:var(--dim);margin-top:5px;text-transform:uppercase;letter-spacing:.5px}
+.stat-card.purple .stat-value{color:var(--accent)}
+.stat-card.red .stat-value{color:var(--red)}
+.stat-card.amber .stat-value{color:var(--amber)}
+.stat-card.blue .stat-value{color:var(--blue)}
+
+/* TOAST */
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);animation:toastIn .3s ease;max-width:360px}
+.toast-success{background:var(--accent);color:#fff}
+.toast-error{background:var(--red);color:#fff}
+.toast-info{background:#1a4a8a;color:#fff}
+.toast.out{animation:toastOut .3s ease forwards}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateX(20px)}}
+
+/* MISC */
+.temp-badge{font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--amber-l);color:var(--amber);padding:2px 6px;border-radius:4px}
+.empty-state{text-align:center;padding:48px 24px;color:var(--dim)}
+.empty-state .es-icon{font-size:40px;margin-bottom:12px;display:block}
+.loading-row td{text-align:center;padding:32px;color:var(--dim)}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:768px){
+  .sidebar{display:none}
+  .page{padding:20px 16px}
+  .form-grid.cols2,.form-grid.cols3{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">🧪 LabStock</div>
+    <div class="login-sub">Gestión de Insumos de Laboratorio</div>
+    <button class="btn-google" onclick="handleLogin()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+      Iniciar sesión con Google
+    </button>
+    <div class="login-note">Solo usuarios autorizados del laboratorio</div>
+    <div id="login-status"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-label">🧪 LabStock</div>
+    <div class="brand-sub">Gestión de Insumos</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Módulos</div>
+    <button class="nav-item active" onclick="showPage('dashboard')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" onclick="showPage('alta')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Alta de Insumos
+    </button>
+    <button class="nav-item" onclick="showPage('baja')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Baja de Insumos
+    </button>
+    <button class="nav-item" onclick="showPage('consultas')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Consultas
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div id="user-avatar-wrap"></div>
+      <div style="min-width:0">
+        <div class="user-name" id="user-name">—</div>
+        <div class="user-email" id="user-email">—</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="handleLogout()">Cerrar sesión</button>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-title">Dashboard</div>
+      <div class="page-desc">Resumen del stock — conectado a Google Sheets</div>
+    </div>
+    <button class="sync-btn" id="sync-btn" onclick="syncFromSheets()">
+      <span class="sync-dot"></span>
+      <span id="sync-label">Sincronizar</span>
+    </button>
+  </div>
+  <div id="dash-year-tabs" class="year-tabs-bar"></div>
+  <div class="stats-row">
+    <div class="stat-card blue"><div class="stat-value" id="stat-total">—</div><div class="stat-label">Total insumos</div></div>
+    <div class="stat-card purple"><div class="stat-value" id="stat-disp">—</div><div class="stat-label">Disponibles</div></div>
+    <div class="stat-card red"><div class="stat-value" id="stat-baja">—</div><div class="stat-label">Dados de baja</div></div>
+    <div class="stat-card amber"><div class="stat-value" id="stat-vence">—</div><div class="stat-label">Por vencer</div></div>
+    <div class="stat-card red"><div class="stat-value" id="stat-vencido">—</div><div class="stat-label">Vencidos</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Últimos movimientos</div>
+    <div class="table-wrap">
+      <table class="results-table">
+        <thead><tr><th>Fecha</th><th>Hoja</th><th>Insumo</th><th>N° Catálogo</th><th>N° Lote</th><th>Estado</th></tr></thead>
+        <tbody id="dash-tbody"><tr class="loading-row"><td colspan="6"><span class="spinner"></span>Cargando desde Google Sheets…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ALTA -->
+<div class="page" id="page-alta">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-title">Alta de Insumos</div>
+      <div class="page-desc">Los datos se escribirán directamente en la hoja del año correspondiente.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Datos del insumo</div>
+    <div class="form-grid cols2">
+      <div class="field">
+        <label>Nombre del insumo</label>
+        <div class="field-wrap">
+          <input type="text" id="alta-nombre" placeholder="Ej: 2X Oncomine Focus DNA Assay" oninput="altaAC('nombre')" autocomplete="off">
+          <div class="alta-ac-list" id="ac-nombre"></div>
+        </div>
+        <span class="autofill-tag" id="tag-nombre">✦ Autocompletado desde stock</span>
+      </div>
+      <div class="field">
+        <label>N° Catálogo</label>
+        <div class="field-wrap">
+          <input type="text" id="alta-catalogo" placeholder="Ej: A42006" oninput="altaAC('catalogo')" autocomplete="off">
+          <div class="alta-ac-list" id="ac-catalogo"></div>
+        </div>
+        <span class="autofill-tag" id="tag-catalogo">✦ Autocompletado desde stock</span>
+      </div>
+      <div class="field">
+        <label>N° Lote (base)</label>
+        <div class="field-wrap">
+          <input type="text" id="alta-lote" placeholder="Ej: 2409037" oninput="altaAC('lote')" autocomplete="off">
+          <div class="alta-ac-list" id="ac-lote"></div>
+        </div>
+        <span class="hint">Se agregará A, B, C… (o AA, AB… si hay más de 27)</span>
+        <span class="autofill-tag" id="tag-lote">✦ Autocompletado desde stock</span>
+      </div>
+      <div class="field">
+        <label>Cantidad de unidades</label>
+        <input type="number" id="alta-cantidad" min="1" value="1" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Fecha de llegada</label>
+        <input type="date" id="alta-fecha" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Fecha de vencimiento</label>
+        <input type="date" id="alta-vencimiento" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Temperatura de almacenamiento</label>
+        <select id="alta-temp" onchange="updatePreview()">
+          <option value="Ambiente">Ambiente</option>
+          <option value="-20°C">-20°C</option>
+          <option value="-30 a -10">-30 a -10</option>
+          <option value="-80°C">-80°C</option>
+          <option value="2 a 8°C">2 a 8°C (heladera)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Vista previa — filas que se escribirán en Sheets</div>
+    <div class="preview-table-wrap">
+      <table class="preview-table">
+        <thead><tr><th>Fecha llegada</th><th>Insumo</th><th>N° Catálogo</th><th>N° Lote</th><th>Vencimiento</th><th>Temp.</th><th>Hoja (año)</th></tr></thead>
+        <tbody id="preview-tbody">
+          <tr><td colspan="7" style="text-align:center;color:var(--dim);padding:24px">Completá los datos para ver la vista previa</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-confirmar-alta" onclick="confirmarAlta()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Confirmar alta en Sheets
+      </button>
+      <button class="btn btn-ghost" onclick="limpiarAlta()">Limpiar</button>
+    </div>
+  </div>
+</div>
+
+<!-- BAJA -->
+<div class="page" id="page-baja">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-title">Baja de Insumos</div>
+      <div class="page-desc">Buscá un insumo y registrá las fechas de uso. Se actualizará en Sheets.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Búsqueda</div>
+    <div class="form-grid cols3">
+      <div class="field">
+        <label>Tipo de búsqueda</label>
+        <select id="baja-tipo" onchange="onBajaTipoChange()">
+          <option value="nombre">Por nombre</option>
+          <option value="catalogo">Por N° Catálogo</option>
+          <option value="lote">Por N° Lote</option>
+          <option value="fecha">Por fecha de llegada</option>
+        </select>
+      </div>
+      <div class="field" id="baja-text-wrap">
+        <label id="baja-search-label">Término de búsqueda</label>
+        <input type="text" id="baja-search-input" placeholder="Escribí para buscar…" oninput="buscarBaja()">
+      </div>
+      <div class="field" id="baja-date-wrap" style="display:none">
+        <label>Fecha de llegada</label>
+        <input type="date" id="baja-search-date" onchange="buscarBaja()">
+      </div>
+    </div>
+    <div id="baja-results" class="baja-results">
+      <div id="baja-list"></div>
+    </div>
+  </div>
+  <div class="card baja-form" id="baja-form-card">
+    <div class="card-title">Registrar uso</div>
+    <div id="baja-selected-tag"></div>
+    <div class="form-grid cols2">
+      <div class="field">
+        <label>Fecha de inicio de uso</label>
+        <input type="date" id="baja-inicio">
+      </div>
+      <div class="field">
+        <label>Fecha de fin de uso</label>
+        <input type="date" id="baja-fin">
+        <span class="hint">Dejar vacío si sigue en uso</span>
+      </div>
+      <div class="field">
+        <label>Rendimiento (opcional)</label>
+        <input type="text" id="baja-rendimiento" placeholder="Ej: 80%, 32 reacciones…">
+      </div>
+      <div class="field">
+        <label>Observaciones (opcional)</label>
+        <input type="text" id="baja-obs" placeholder="Notas adicionales">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-danger" id="btn-confirmar-baja" onclick="confirmarBaja()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Confirmar baja en Sheets
+      </button>
+      <button class="btn btn-ghost" onclick="cancelarBaja()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONSULTAS -->
+<div class="page" id="page-consultas">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-title">Consultas</div>
+      <div class="page-desc">Todos los años incluidos por defecto.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div id="consulta-year-tabs" class="year-tabs-bar"></div>
+    <div class="search-wrap" style="margin-bottom:16px">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="search-input" id="consulta-input" placeholder="Buscar por nombre, catálogo o lote…" oninput="buscarConsulta()" autocomplete="off">
+      <div class="autocomplete-list" id="ac-list"></div>
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="setFilter('todos',this)">Todos</button>
+      <button class="filter-btn" onclick="setFilter('disponible',this)">🟣 Disponibles</button>
+      <button class="filter-btn" onclick="setFilter('baja',this)">🔴 Dados de baja</button>
+      <button class="filter-btn" onclick="setFilter('vence',this)">🟡 Por vencer</button>
+      <button class="filter-btn" onclick="setFilter('vencido',this)">⚠️ Vencidos</button>
+    </div>
+    <div class="table-wrap">
+      <table class="results-table">
+        <thead><tr><th>Insumo</th><th>N° Catálogo</th><th>N° Lote</th><th>Hoja</th><th>Llegada</th><th>Vencimiento</th><th>Temp.</th><th>Estado</th><th>Período de uso</th></tr></thead>
+        <tbody id="consulta-tbody"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--dim)" id="consulta-count"></div>
+  </div>
+</div>
+
+</main>
+</div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+const CLIENT_ID   = '1010719643686-t7mbbrm83gjar49odmbth8i5ct1bciof.apps.googleusercontent.com';
+const SHEET_ID    = '1Q32_j2Evi9KxpWoJqUHcRDs_xoQEMGUijTS5exgbXIY';
+const SCOPES      = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
+const DISCOVERY   = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
+
+// Columnas (B=1 en base-1, pero la API usa índice base-0 para columnas en batchUpdate)
+// Fila: [checkbox(A), fecha(B), nombre(C), catalogo(D), lote(E), vencimiento(F),
+//        inicioConsumo(G), finConsumo(H), tempAlmacen(I), rendimiento(J), obs(K)]
+// Cuando leemos con range "Año!B:K" → índices 0..9
+const COL = { fecha:0, nombre:1, catalogo:2, lote:3, vencimiento:4,
+              inicioConsumo:5, finConsumo:6, tempAlmacen:7, rendimiento:8, obs:9 };
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let stock         = [];       // [{id, sheetName, rowIndex, fecha, nombre, ...}]
+let sheetNames    = [];       // ['2024','2025',...]
+let nextLocalId   = 1;
+let bajaSelectedId = null;
+let consultaFilter = 'todos';
+let consultaQuery  = '';
+let dashYear       = 'todos';
+let consultaYear   = 'todos';
+const altaSugs     = {nombre:[], catalogo:[], lote:[]};
+let tokenClient;
+let gapiReady = false;
+let gisReady  = false;
+
+// ═══════════════════════════════════════════════════════════════
+// GOOGLE IDENTITY / AUTH
+// ═══════════════════════════════════════════════════════════════
+function gapiLoaded() {
+  gapi.load('client', async () => {
+    await gapi.client.init({ discoveryDocs: [DISCOVERY] });
+    gapiReady = true;
+    maybeReady();
+  });
+}
+
+function gisLoaded() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: async (resp) => {
+      if (resp.error) {
+        setLoginStatus('Error al autenticar: ' + resp.error, true);
+        return;
+      }
+      await afterLogin();
+    }
+  });
+  gisReady = true;
+  maybeReady();
+}
+
+function maybeReady() {
+  if (gapiReady && gisReady) {
+    document.getElementById('login-status').textContent = 'Listo para conectar';
+  }
+}
+
+function handleLogin() {
+  if (!gapiReady || !gisReady) {
+    setLoginStatus('Cargando librerías de Google…');
+    setTimeout(handleLogin, 800);
+    return;
+  }
+  setLoginStatus('Iniciando sesión…');
+  if (gapi.client.getToken() === null) {
+    tokenClient.requestAccessToken({ prompt: 'consent' });
+  } else {
+    tokenClient.requestAccessToken({ prompt: '' });
+  }
+}
+
+function handleLogout() {
+  const token = gapi.client.getToken();
+  if (token) {
+    google.accounts.oauth2.revoke(token.access_token);
+    gapi.client.setToken('');
+  }
+  stock = [];
+  sheetNames = [];
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+async function afterLogin() {
+  // Get user profile
+  try {
+    const resp = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: 'Bearer ' + gapi.client.getToken().access_token }
+    });
+    const info = await resp.json();
+    document.getElementById('user-name').textContent = info.name || 'Usuario';
+    document.getElementById('user-email').textContent = info.email || '';
+    const wrap = document.getElementById('user-avatar-wrap');
+    if (info.picture) {
+      wrap.innerHTML = `<img src="${info.picture}" class="user-avatar" referrerpolicy="no-referrer">`;
+    } else {
+      const initials = (info.name||'U').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+      wrap.innerHTML = `<div class="user-avatar-placeholder">${initials}</div>`;
+    }
+  } catch(e) {}
+
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  await syncFromSheets();
+}
+
+function setLoginStatus(msg, isError=false) {
+  const el = document.getElementById('login-status');
+  el.textContent = msg;
+  el.style.color = isError ? 'var(--red)' : 'var(--dim)';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SHEETS API — READ
+// ═══════════════════════════════════════════════════════════════
+async function syncFromSheets() {
+  setSyncState('syncing', 'Sincronizando…');
+  try {
+    // 1. Get all sheet names
+    const meta = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: SHEET_ID });
+    sheetNames = meta.result.sheets
+      .map(s => s.properties.title)
+      .filter(t => /^\d{4}$/.test(t))   // only year tabs like "2024", "2025"
+      .sort();
+
+    // 2. Read all sheets in batch
+    const ranges = sheetNames.map(y => `${y}!B:K`);
+    if (!ranges.length) {
+      stock = [];
+      setSyncState('ok', 'Sin datos');
+      renderAll();
+      return;
+    }
+    const batchResp = await gapi.client.sheets.spreadsheets.values.batchGet({
+      spreadsheetId: SHEET_ID,
+      ranges
+    });
+
+    stock = [];
+    nextLocalId = 1;
+    const valueRanges = batchResp.result.valueRanges || [];
+
+    valueRanges.forEach((vr, sheetIdx) => {
+      const sheetName = sheetNames[sheetIdx];
+      const rows = vr.values || [];
+      rows.forEach((row, rowIdx) => {
+        if (rowIdx === 0) return; // skip header row
+        const fecha = row[COL.fecha] || '';
+        if (!fecha) return; // skip empty rows
+        stock.push({
+          id: nextLocalId++,
+          sheetName,
+          rowIndex: rowIdx + 1, // 1-based, accounting for header
+          fecha:          fecha,
+          nombre:         row[COL.nombre]       || '',
+          catalogo:       row[COL.catalogo]     || '',
+          lote:           row[COL.lote]         || '',
+          vencimiento:    row[COL.vencimiento]  || '',
+          inicioConsumo:  row[COL.inicioConsumo]|| '',
+          finConsumo:     row[COL.finConsumo]   || '',
+          tempAlmacen:    row[COL.tempAlmacen]  || 'Ambiente',
+          rendimiento:    row[COL.rendimiento]  || '',
+          obs:            row[COL.obs]          || '',
+        });
+      });
+    });
+
+    setSyncState('ok', 'Sincronizado');
+    toast(`✓ ${stock.length} insumos cargados de ${sheetNames.length} hoja${sheetNames.length!==1?'s':''}`);
+    renderAll();
+  } catch(e) {
+    console.error(e);
+    setSyncState('error', 'Error al sincronizar');
+    toast('Error al leer Google Sheets: ' + (e.result?.error?.message || e.message), 'error');
+  }
+}
+
+function setSyncState(state, label) {
+  const btn = document.getElementById('sync-btn');
+  btn.className = 'sync-btn ' + state;
+  document.getElementById('sync-label').textContent = label;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SHEETS API — WRITE (Alta)
+// ═══════════════════════════════════════════════════════════════
+async function writeRowsToSheet(sheetName, rows) {
+  // rows = array of arrays: [fecha, nombre, catalogo, lote, vencimiento, inicio, fin, temp, rendimiento, obs]
+  // We write to columns B:K (prepend empty for A checkbox)
+  const values = rows.map(r => ['', ...r]); // col A stays empty
+  await gapi.client.sheets.spreadsheets.values.append({
+    spreadsheetId: SHEET_ID,
+    range: `${sheetName}!A:K`,
+    valueInputOption: 'USER_ENTERED',
+    insertDataOption: 'INSERT_ROWS',
+    resource: { values }
+  });
+}
+
+async function ensureSheetExists(year) {
+  if (sheetNames.includes(year)) return false; // already exists
+
+  // Create new sheet tab
+  await gapi.client.sheets.spreadsheets.batchUpdate({
+    spreadsheetId: SHEET_ID,
+    resource: {
+      requests: [{
+        addSheet: {
+          properties: {
+            title: year,
+            gridProperties: { rowCount: 1000, columnCount: 12 }
+          }
+        }
+      }]
+    }
+  });
+
+  // Write header row (same as other sheets)
+  await gapi.client.sheets.spreadsheets.values.update({
+    spreadsheetId: SHEET_ID,
+    range: `${year}!B1:K1`,
+    valueInputOption: 'USER_ENTERED',
+    resource: { values: [['Fecha','Insumo','N° Catálogo','N° Lote','Vencimiento','Inicio consumo','Fin consumo','Temp. almacén','Rendimiento','Observaciones']] }
+  });
+
+  sheetNames.push(year);
+  sheetNames.sort();
+  return true; // was created
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SHEETS API — WRITE (Baja — update specific row)
+// ═══════════════════════════════════════════════════════════════
+async function updateRowInSheet(item) {
+  // item.rowIndex is 1-based (data row, after header → actual sheet row = rowIndex + 1)
+  const sheetRow = item.rowIndex + 1; // +1 for header
+  const range = `${item.sheetName}!G${sheetRow}:K${sheetRow}`;
+  await gapi.client.sheets.spreadsheets.values.update({
+    spreadsheetId: SHEET_ID,
+    range,
+    valueInputOption: 'USER_ENTERED',
+    resource: { values: [[
+      item.inicioConsumo || '',
+      item.finConsumo    || '',
+      item.tempAlmacen   || '',
+      item.rendimiento   || '',
+      item.obs           || ''
+    ]] }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+function getAnio(item) { return item.sheetName || item.fecha?.substring(0,4) || '?'; }
+
+function getAnios() { return [...new Set(stock.map(getAnio))].sort(); }
+
+function getEstado(item) {
+  // Considerar dado de baja si tiene fecha de fin o "NA"
+  const fin = (item.finConsumo || '').trim();
+  if (fin && fin.toUpperCase() !== '') return 'baja';
+  if (!item.vencimiento) return 'disponible';
+  // Parsear DD/MM/YYYY o YYYY-MM-DD
+  let venceDate;
+  const v = item.vencimiento.trim();
+  if (v.includes('/')) {
+    const [d,m,y] = v.split('/');
+    venceDate = new Date(`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
+  } else {
+    venceDate = new Date(v);
+  }
+  if (isNaN(venceDate)) return 'disponible';
+  const diff = (venceDate - new Date()) / 86400000;
+  if (diff < 0)  return 'vencido';  // ya venció sin haber sido dado de baja
+  if (diff < 60) return 'vence';    // vence en menos de 60 días
+  return 'disponible';
+}
+
+function fmtFecha(str) {
+  if (!str) return '—';
+  // Handle DD/MM/YYYY from sheets or YYYY-MM-DD
+  if (str.includes('/')) return str;
+  const [y,m,d] = str.split('-');
+  return d && m && y ? `${d}/${m}/${y}` : str;
+}
+
+function toSheetDate(isoStr) {
+  // Google Sheets accepts DD/MM/YYYY
+  if (!isoStr) return '';
+  const [y,m,d] = isoStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function estadoBadge(item) {
+  const e = getEstado(item);
+  if (e==='baja')     return '<span class="badge badge-baja">Dado de baja</span>';
+  if (e==='vencido')  return '<span class="badge badge-vencido">⚠ Vencido</span>';
+  if (e==='vence')    return '<span class="badge badge-vence">Por vencer</span>';
+  return '<span class="badge badge-disponible">Disponible</span>';
+}
+
+function tempBadge(t) { return `<span class="temp-badge">${t||'—'}</span>`; }
+
+function yearBadge(y) {
+  return `<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--blue-l);color:var(--blue);padding:2px 6px;border-radius:4px">${y}</span>`;
+}
+
+function getLetter(n) {
+  const base = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+  const b = base.length;
+  if (n < b) return base[n];
+  let result = '', idx = n + 1;
+  while (idx > 0) { idx--; result = base[idx % b] + result; idx = Math.floor(idx / b); }
+  return result;
+}
+
+function toast(msg, type='success') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.innerHTML = `<span>${type==='success'?'✓':type==='info'?'ℹ':'✕'}</span> ${msg}`;
+  c.appendChild(t);
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),300)}, 4000);
+}
+
+function renderAll() {
+  renderDashboard();
+  renderConsulta();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')?.includes(id)) n.classList.add('active');
+  });
+  if(id==='consultas') renderConsulta();
+  if(id==='dashboard') renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// YEAR TABS
+// ═══════════════════════════════════════════════════════════════
+function renderYearTabs(containerId, currentYear, onSelectFn) {
+  const años = getAnios();
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  let html = `<button class="year-tab ${currentYear==='todos'?'active':''}" onclick="${onSelectFn}('todos')">
+    Todos <span class="tab-count">${stock.length}</span></button>`;
+  for (const año of años) {
+    const count = stock.filter(i=>getAnio(i)===año).length;
+    html += `<button class="year-tab ${currentYear===año?'active':''}" onclick="${onSelectFn}('${año}')">
+      📋 ${año} <span class="tab-count">${count}</span></button>`;
+  }
+  container.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+function setDashYear(año) { dashYear = año; renderDashboard(); }
+
+function renderDashboard() {
+  renderYearTabs('dash-year-tabs', dashYear, 'setDashYear');
+  const filtered = dashYear==='todos' ? stock : stock.filter(i=>getAnio(i)===dashYear);
+  document.getElementById('stat-total').textContent = filtered.length;
+  document.getElementById('stat-disp').textContent  = filtered.filter(i=>getEstado(i)==='disponible').length;
+  document.getElementById('stat-baja').textContent  = filtered.filter(i=>getEstado(i)==='baja').length;
+  document.getElementById('stat-vence').textContent = filtered.filter(i=>getEstado(i)==='vence').length;
+  document.getElementById('stat-vencido').textContent = filtered.filter(i=>getEstado(i)==='vencido').length;
+  const sorted = [...filtered].sort((a,b)=>new Date(b.fecha.split('/').reverse().join('-'))-new Date(a.fecha.split('/').reverse().join('-'))).slice(0,10);
+  document.getElementById('dash-tbody').innerHTML = sorted.length
+    ? sorted.map(i=>`<tr>
+        <td>${fmtFecha(i.fecha)}</td><td>${yearBadge(getAnio(i))}</td>
+        <td>${i.nombre}</td><td><span class="mono">${i.catalogo}</span></td>
+        <td><span class="lote-badge">${i.lote}</span></td><td>${estadoBadge(i)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="6" style="text-align:center;color:var(--dim);padding:32px">Sin datos</td></tr>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ALTA — AUTOCOMPLETE
+// ═══════════════════════════════════════════════════════════════
+function altaAC(field) {
+  updatePreview();
+  const q = document.getElementById('alta-'+field).value.trim().toLowerCase();
+  const listEl = document.getElementById('ac-'+field);
+  if (!q) { listEl.classList.remove('show'); return; }
+
+  const seen = new Set();
+  const sugs = [];
+  for (const item of stock) {
+    let val, subLabel;
+    if (field==='catalogo') { val=item.catalogo; subLabel=item.nombre; }
+    else if (field==='lote') { val=item.lote.replace(/\s+[A-ZÑ]{1,3}$/,'').trim(); subLabel=`${item.nombre} · Cat: ${item.catalogo} · Vence: ${fmtFecha(item.vencimiento)}`; }
+    else { val=item.nombre; subLabel=`Catálogo: ${item.catalogo}`; }
+    if (val.toLowerCase().includes(q) && !seen.has(val)) {
+      seen.add(val); sugs.push({val, subLabel, item});
+    }
+    if (sugs.length>=6) break;
+  }
+  altaSugs[field] = sugs;
+  if (!sugs.length) { listEl.classList.remove('show'); return; }
+  const esc = q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  listEl.innerHTML = sugs.map((s,idx)=>`
+    <div class="alta-ac-item" data-idx="${idx}" data-field="${field}">
+      <div class="ai-main">${s.val.replace(new RegExp(`(${esc})`,'gi'),'<strong style="color:var(--accent)">$1</strong>')}</div>
+      <div class="ai-sub">${s.subLabel}</div>
+    </div>`).join('');
+  listEl.classList.add('show');
+}
+
+document.addEventListener('mousedown', e => {
+  const el = e.target.closest('.alta-ac-item');
+  if (el) { e.preventDefault(); altaACSelect(el.dataset.field, parseInt(el.dataset.idx)); }
+});
+
+function altaACSelect(field, idx) {
+  const sug = altaSugs[field]?.[idx]; if (!sug) return;
+  document.getElementById('alta-'+field).value = sug.val;
+  document.getElementById('ac-'+field).classList.remove('show');
+  const tag = document.getElementById('tag-'+field);
+  if (tag) { tag.classList.add('show'); setTimeout(()=>tag.classList.remove('show'),3000); }
+  flashFill('alta-'+field);
+  const item = sug.item;
+  const tempMap = {'Ambiente':0,'-20°C':1,'-30 a -10':2,'-80°C':3,'2 a 8°C':4};
+  if (field==='catalogo') {
+    const n = document.getElementById('alta-nombre');
+    if (!n.value.trim()) { n.value=item.nombre; flashFill('alta-nombre'); }
+    const t=document.getElementById('alta-temp'); if(item.tempAlmacen in tempMap) t.selectedIndex=tempMap[item.tempAlmacen];
+  } else if (field==='lote') {
+    const n=document.getElementById('alta-nombre'), c=document.getElementById('alta-catalogo'), v=document.getElementById('alta-vencimiento'), t=document.getElementById('alta-temp');
+    if (!n.value.trim()) { n.value=item.nombre; flashFill('alta-nombre'); }
+    if (!c.value.trim()) { c.value=item.catalogo; flashFill('alta-catalogo'); }
+    if (!v.value) { v.value=item.vencimiento; flashFill('alta-vencimiento'); }
+    if(item.tempAlmacen in tempMap) t.selectedIndex=tempMap[item.tempAlmacen];
+  } else if (field==='nombre') {
+    const c=document.getElementById('alta-catalogo'), t=document.getElementById('alta-temp');
+    if (!c.value.trim()) { c.value=item.catalogo; flashFill('alta-catalogo'); }
+    if(item.tempAlmacen in tempMap) t.selectedIndex=tempMap[item.tempAlmacen];
+  }
+  updatePreview();
+}
+
+function flashFill(id) {
+  const el = document.getElementById(id); if (!el) return;
+  el.classList.add('autofilled'); setTimeout(()=>el.classList.remove('autofilled'),2000);
+}
+
+document.addEventListener('click', e => {
+  ['ac-nombre','ac-catalogo','ac-lote'].forEach(id=>{
+    const l=document.getElementById(id);
+    if(l && !e.target.closest(`#${id}`) && !e.target.closest('.field-wrap')) l.classList.remove('show');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// ALTA — PREVIEW & CONFIRM
+// ═══════════════════════════════════════════════════════════════
+function updatePreview() {
+  const nombre    = document.getElementById('alta-nombre').value.trim();
+  const catalogo  = document.getElementById('alta-catalogo').value.trim();
+  const lote      = document.getElementById('alta-lote').value.trim();
+  const cantidad  = parseInt(document.getElementById('alta-cantidad').value)||1;
+  const fecha     = document.getElementById('alta-fecha').value;
+  const venc      = document.getElementById('alta-vencimiento').value;
+  const temp      = document.getElementById('alta-temp').value;
+  const tbody     = document.getElementById('preview-tbody');
+  const año       = fecha ? fecha.substring(0,4) : '—';
+
+  if (!nombre && !catalogo && !lote) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--dim);padding:24px">Completá los datos para ver la vista previa</td></tr>';
+    return;
+  }
+  let rows = '';
+  for (let i=0; i<cantidad; i++) {
+    const loteCompleto = lote ? `${lote} ${getLetter(i)}` : getLetter(i);
+    rows += `<tr class="preview-row-new">
+      <td>${fmtFecha(fecha)||'—'}</td><td>${nombre||'—'}</td>
+      <td><span class="mono">${catalogo||'—'}</span></td>
+      <td><span class="lote-badge">${loteCompleto}</span></td>
+      <td>${fmtFecha(venc)||'—'}</td><td>${tempBadge(temp)}</td>
+      <td>${yearBadge(año)}</td>
+    </tr>`;
+  }
+  tbody.innerHTML = rows;
+}
+
+async function confirmarAlta() {
+  const nombre   = document.getElementById('alta-nombre').value.trim();
+  const catalogo = document.getElementById('alta-catalogo').value.trim();
+  const lote     = document.getElementById('alta-lote').value.trim();
+  const cantidad = parseInt(document.getElementById('alta-cantidad').value)||1;
+  const fecha    = document.getElementById('alta-fecha').value;
+  const venc     = document.getElementById('alta-vencimiento').value;
+  const temp     = document.getElementById('alta-temp').value;
+
+  if (!nombre||!catalogo||!lote||!fecha||!venc) {
+    toast('Completá todos los campos obligatorios','error'); return;
+  }
+
+  const año = fecha.substring(0,4);
+  const btn = document.getElementById('btn-confirmar-alta');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Escribiendo en Sheets…';
+
+  try {
+    const esNueva = await ensureSheetExists(año);
+
+    // Build rows to append
+    const rows = [];
+    for (let i=0; i<cantidad; i++) {
+      rows.push([
+        toSheetDate(fecha),
+        nombre, catalogo,
+        `${lote} ${getLetter(i)}`,
+        toSheetDate(venc),
+        '', '', temp, '', ''
+      ]);
+    }
+    await writeRowsToSheet(año, rows);
+
+    if (esNueva) {
+      toast(`✦ Hoja "${año}" creada automáticamente — ${cantidad} insumo${cantidad>1?'s':''} registrado${cantidad>1?'s':''}`);
+    } else {
+      toast(`✓ ${cantidad} unidad${cantidad>1?'es':''} registrada${cantidad>1?'s':''} en hoja ${año}`);
+    }
+
+    limpiarAlta();
+    await syncFromSheets(); // reload data
+  } catch(e) {
+    console.error(e);
+    toast('Error al escribir en Sheets: '+(e.result?.error?.message||e.message), 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Confirmar alta en Sheets';
+  }
+}
+
+function limpiarAlta() {
+  ['alta-nombre','alta-catalogo','alta-lote','alta-fecha','alta-vencimiento'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('alta-cantidad').value=1;
+  document.getElementById('alta-temp').selectedIndex=0;
+  updatePreview();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BAJA
+// ═══════════════════════════════════════════════════════════════
+function onBajaTipoChange() {
+  const tipo = document.getElementById('baja-tipo').value;
+  const isFecha = tipo==='fecha';
+  document.getElementById('baja-text-wrap').style.display = isFecha?'none':'flex';
+  document.getElementById('baja-date-wrap').style.display = isFecha?'flex':'none';
+  const labels = {nombre:'Nombre del insumo',catalogo:'N° Catálogo',lote:'N° Lote'};
+  document.getElementById('baja-search-label').textContent = labels[tipo]||'Término';
+  document.getElementById('baja-results').classList.remove('show');
+  document.getElementById('baja-form-card').classList.remove('show');
+  bajaSelectedId = null;
+}
+
+function buscarBaja() {
+  const tipo = document.getElementById('baja-tipo').value;
+  const q = tipo==='fecha'
+    ? document.getElementById('baja-search-date').value
+    : document.getElementById('baja-search-input').value.trim().toLowerCase();
+  if (!q) { document.getElementById('baja-results').classList.remove('show'); return; }
+
+  let results = stock.filter(i => {
+    if (getEstado(i)==='baja') return false;
+    if (tipo==='nombre')   return i.nombre.toLowerCase().includes(q);
+    if (tipo==='catalogo') return i.catalogo.toLowerCase().includes(q);
+    if (tipo==='lote')     return i.lote.toLowerCase().includes(q);
+    if (tipo==='fecha') {
+      const fq = q.split('-').reverse().join('/');
+      return i.fecha===q || i.fecha===fq;
+    }
+    return false;
+  });
+
+  const list = document.getElementById('baja-list');
+  list.innerHTML = results.length
+    ? results.map(i=>`
+        <div class="insumo-row" id="row-${i.id}" onclick="selectBaja(${i.id})">
+          <div class="insumo-row-icon">🧪</div>
+          <div class="insumo-row-info">
+            <div class="insumo-row-name">${i.nombre}</div>
+            <div class="insumo-row-meta">
+              <span>📋 ${i.catalogo}</span><span>🔖 ${i.lote}</span>
+              <span>📅 ${fmtFecha(i.fecha)}</span><span>${yearBadge(getAnio(i))}</span>
+            </div>
+          </div>
+          <div class="check-circle"><span class="check-icon">✓</span></div>
+        </div>`).join('')
+    : '<div class="empty-state"><span class="es-icon">🔍</span><p>No se encontraron insumos disponibles</p></div>';
+
+  document.getElementById('baja-results').classList.add('show');
+  document.getElementById('baja-form-card').classList.remove('show');
+  bajaSelectedId = null;
+}
+
+function selectBaja(id) {
+  bajaSelectedId = id;
+  document.querySelectorAll('.insumo-row').forEach(r=>r.classList.remove('selected'));
+  document.getElementById('row-'+id)?.classList.add('selected');
+  const item = stock.find(i=>i.id===id);
+  document.getElementById('baja-selected-tag').innerHTML =
+    `<div class="selected-tag">✓ <strong>${item.nombre}</strong> — Lote <span class="mono">${item.lote}</span> — ${yearBadge(getAnio(item))}</div>`;
+  document.getElementById('baja-inicio').value = new Date().toISOString().split('T')[0];
+  document.getElementById('baja-fin').value = '';
+  document.getElementById('baja-rendimiento').value = item.rendimiento||'';
+  document.getElementById('baja-obs').value = item.obs||'';
+  document.getElementById('baja-form-card').classList.add('show');
+  setTimeout(()=>document.getElementById('baja-form-card').scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+}
+
+async function confirmarBaja() {
+  if (!bajaSelectedId) { toast('Seleccioná un insumo primero','error'); return; }
+  const inicio = document.getElementById('baja-inicio').value;
+  const fin    = document.getElementById('baja-fin').value;
+  const rend   = document.getElementById('baja-rendimiento').value;
+  const obs    = document.getElementById('baja-obs').value;
+  if (!inicio) { toast('La fecha de inicio es obligatoria','error'); return; }
+
+  const btn = document.getElementById('btn-confirmar-baja');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Actualizando Sheets…';
+
+  try {
+    const item = stock.find(i=>i.id===bajaSelectedId);
+    item.inicioConsumo = toSheetDate(inicio);
+    item.finConsumo    = toSheetDate(fin);
+    item.rendimiento   = rend;
+    item.obs           = obs;
+    await updateRowInSheet(item);
+    toast(`✓ Baja registrada: "${item.nombre}" — Lote ${item.lote}`);
+    cancelarBaja();
+    document.getElementById('baja-results').classList.remove('show');
+    document.getElementById('baja-search-input').value='';
+    await syncFromSheets();
+  } catch(e) {
+    console.error(e);
+    toast('Error al actualizar Sheets: '+(e.result?.error?.message||e.message),'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Confirmar baja en Sheets';
+  }
+}
+
+function cancelarBaja() {
+  bajaSelectedId = null;
+  document.getElementById('baja-form-card').classList.remove('show');
+  document.querySelectorAll('.insumo-row').forEach(r=>r.classList.remove('selected'));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONSULTAS
+// ═══════════════════════════════════════════════════════════════
+function setConsultaYear(año) { consultaYear=año; renderConsulta(); }
+function setFilter(f,btn) {
+  consultaFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderConsulta();
+}
+function buscarConsulta() {
+  consultaQuery=document.getElementById('consulta-input').value.trim().toLowerCase();
+  renderACConsulta(); renderConsulta();
+}
+function renderACConsulta() {
+  const q=consultaQuery, list=document.getElementById('ac-list');
+  if (!q||q.length<2) { list.classList.remove('show'); return; }
+  const seen=new Set(), sugs=[];
+  for (const item of stock) {
+    for (const k of [item.nombre,item.catalogo,item.lote]) {
+      if (k.toLowerCase().includes(q)&&!seen.has(k)) {
+        seen.add(k);
+        const esc=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+        const hl=k.replace(new RegExp(`(${esc})`,'gi'),'<span class="ac-highlight">$1</span>');
+        const sub=k===item.nombre?`Cat: ${item.catalogo} · ${getAnio(item)}`:`En: ${item.nombre}`;
+        sugs.push({main:hl,sub,val:k});
+      }
+    }
+    if(sugs.length>=6) break;
+  }
+  if(!sugs.length){list.classList.remove('show');return;}
+  list.innerHTML=sugs.map(s=>`<div class="autocomplete-item" onclick="selectACConsulta('${s.val.replace(/'/g,"\\'")}')"><div class="ac-main">${s.main}</div><div class="ac-sub">${s.sub}</div></div>`).join('');
+  list.classList.add('show');
+}
+function selectACConsulta(val) {
+  document.getElementById('consulta-input').value=val;
+  consultaQuery=val.toLowerCase();
+  document.getElementById('ac-list').classList.remove('show');
+  renderConsulta();
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.search-wrap')) document.getElementById('ac-list')?.classList.remove('show');
+});
+
+function renderConsulta() {
+  renderYearTabs('consulta-year-tabs', consultaYear, 'setConsultaYear');
+  let items = consultaYear==='todos' ? stock : stock.filter(i=>getAnio(i)===consultaYear);
+  if (consultaQuery) items=items.filter(i=>
+    i.nombre.toLowerCase().includes(consultaQuery)||
+    i.catalogo.toLowerCase().includes(consultaQuery)||
+    i.lote.toLowerCase().includes(consultaQuery));
+  if (consultaFilter!=='todos') items=items.filter(i=>getEstado(i)===consultaFilter);
+
+  const tbody=document.getElementById('consulta-tbody');
+  const count=document.getElementById('consulta-count');
+  if(!items.length) {
+    tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--dim);padding:32px">No se encontraron insumos</td></tr>';
+    count.textContent=''; return;
+  }
+  tbody.innerHTML=items.map(i=>{
+    const e=getEstado(i), rc=e==='baja'?'row-baja':'row-disponible';
+    const uso=i.inicioConsumo?(i.finConsumo?`${i.inicioConsumo} → ${i.finConsumo}`:`Desde ${i.inicioConsumo}`):'—';
+    return `<tr class="${rc}">
+      <td>${i.nombre}</td><td><span class="mono">${i.catalogo}</span></td>
+      <td><span class="lote-badge">${i.lote}</span></td><td>${yearBadge(getAnio(i))}</td>
+      <td>${fmtFecha(i.fecha)}</td><td>${fmtFecha(i.vencimiento)}</td>
+      <td>${tempBadge(i.tempAlmacen)}</td><td>${estadoBadge(i)}</td>
+      <td style="font-size:12px;color:var(--mid)">${uso}</td>
+    </tr>`;
+  }).join('');
+  count.textContent=`Mostrando ${items.length} insumo${items.length!==1?'s':''} · ${consultaYear==='todos'?'Todos los años':'Hoja '+consultaYear}`;
+}
+</script>
+
+<!-- Google APIs -->
+<script src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+<script src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+</body>
+</html>
