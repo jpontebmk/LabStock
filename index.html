@@ -20,6 +20,9 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 
 /* LOGIN */
 #login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:0}
+#loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:16px}
+#loading-overlay .lo-logo{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:var(--accent)}
+#loading-overlay .lo-spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
 .login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:48px 40px;text-align:center;box-shadow:var(--shadow-lg);max-width:380px;width:100%}
 .login-logo{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;color:var(--accent);letter-spacing:-1px;margin-bottom:6px}
 .login-sub{font-size:13px;color:var(--dim);margin-bottom:32px}
@@ -263,6 +266,12 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
     <div class="login-note">Solo usuarios autorizados del laboratorio</div>
     <div id="login-status"></div>
   </div>
+</div>
+
+<!-- LOADING OVERLAY (visible durante auto-login silencioso) -->
+<div id="loading-overlay" style="display:none">
+  <div class="lo-logo">🧪 LabStock</div>
+  <div class="lo-spinner"></div>
 </div>
 
 <!-- APP -->
@@ -602,7 +611,7 @@ function gisLoaded() {
     scope: SCOPES,
     callback: async (resp) => {
       if (resp.error) {
-        // Si fallo el login silencioso, mostrar pantalla de login normal
+        document.getElementById('loading-overlay').style.display = 'none';
         document.getElementById('login-screen').style.display = 'flex';
         setLoginStatus('Hacé clic para ingresar', false);
         return;
@@ -624,11 +633,10 @@ function maybeReady() {
   if (!gapiReady || !gisReady) return;
   const hint = loadHint();
   if (hint) {
-    // Hubo login previo: entrar directo sin mostrar pantalla de login
+    // Hubo login previo: mostrar overlay de carga, ocultar pantalla de login
     document.getElementById('login-screen').style.display = 'none';
-    setLoginStatus('Conectando…');
+    document.getElementById('loading-overlay').style.display = 'flex';
     tokenClient.requestAccessToken({ prompt: '', login_hint: hint });
-    // Si falla (token rechazado), el callback mostrará la pantalla de login
   } else {
     document.getElementById('login-status').textContent = 'Listo para conectar';
   }
@@ -679,6 +687,7 @@ async function afterLogin() {
   } catch(e) {}
 
   document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('loading-overlay').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   await syncFromSheets();
 }
