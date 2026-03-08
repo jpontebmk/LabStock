@@ -183,9 +183,13 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .insumo-row:hover{border-color:var(--accent);background:var(--accent-l)}
 .insumo-row.selected{border-color:var(--accent);background:var(--accent-l);box-shadow:0 0 0 3px rgba(107,63,160,.15)}
 .insumo-row-icon{width:36px;height:36px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
-.insumo-row-info{flex:1;min-width:0}
-.insumo-row-name{font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.insumo-row-meta{font-size:11px;color:var(--dim);margin-top:2px;display:flex;gap:12px;flex-wrap:wrap}
+.insumo-row-info{flex:1;display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;min-width:0}
+.insumo-row-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.insumo-row-cols{display:flex;gap:28px;align-items:center;flex-shrink:0}
+.insumo-row-col{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.insumo-row-col-label{font-size:11px;color:#4a2070;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.insumo-row-col-val{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--text)}
+.insumo-row-divider{width:1px;height:32px;background:var(--border)}
 .check-circle{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);background:var(--surface);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .insumo-row.selected .check-circle{border-color:var(--accent);background:var(--accent)}
 .check-icon{display:none;color:#fff;font-size:10px;font-weight:700}
@@ -786,8 +790,7 @@ async function syncFromSheets() {
     });
 
     // Default: mostrar el año más reciente en Consultas
-    const años = [...new Set(stock.map(getAnio))].sort();
-    if (años.length) consultaYear = años[años.length-1];
+    // consultaYear permanece en 'todos' por defecto
     setSyncState('ok', 'Sincronizado');
     toast(`✓ ${stock.length} insumos cargados de ${sheetNames.length} hoja${sheetNames.length!==1?'s':''}`);
     renderAll();
@@ -1213,9 +1216,12 @@ function buscarBaja() {
           <div class="insumo-row-icon">🧪</div>
           <div class="insumo-row-info">
             <div class="insumo-row-name">${i.nombre}</div>
-            <div class="insumo-row-meta">
-              <span>📋 ${i.catalogo}</span><span>🔖 ${i.lote}</span>
-              <span>📅 ${fmtFecha(i.fecha)}</span><span>${yearBadge(getAnio(i))}</span>
+            <div class="insumo-row-cols">
+              <div class="insumo-row-col"><span class="insumo-row-col-label">Catálogo</span><span class="insumo-row-col-val">${i.catalogo}</span></div>
+              <div class="insumo-row-divider"></div>
+              <div class="insumo-row-col"><span class="insumo-row-col-label">Lote</span><span class="insumo-row-col-val">${i.lote}</span></div>
+              <div class="insumo-row-divider"></div>
+              <div class="insumo-row-col"><span class="insumo-row-col-label">Llegada</span><span class="insumo-row-col-val">${fmtFecha(i.fecha)}</span></div>
             </div>
           </div>
           <div class="check-circle"><span class="check-icon">✓</span></div>
