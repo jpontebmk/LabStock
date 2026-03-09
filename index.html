@@ -233,6 +233,27 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
   .stats-row{grid-template-columns:1fr 1fr}
 }
 
+/* CONSULTA SELECCIÓN */
+.results-table tbody tr{cursor:pointer;transition:background .1s}
+.results-table tbody tr.selected-row{background:#f0eaf8 !important;outline:2px solid var(--accent);outline-offset:-2px}
+.consulta-actions{display:none;margin-top:12px;gap:10px;align-items:center}
+.consulta-actions.show{display:flex}
+.consulta-sel-count{font-size:13px;color:var(--mid);flex:1}
+.btn-modificar{padding:9px 18px;background:var(--accent-l);border:1.5px solid rgba(107,63,160,.3);border-radius:7px;color:var(--accent);font-weight:600;font-size:13px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:all .15s}
+.btn-modificar:hover{background:#e4d6f7;border-color:var(--accent)}
+.btn-eliminar{padding:9px 18px;background:#fff0f0;border:1.5px solid rgba(200,40,40,.3);border-radius:7px;color:#c02828;font-weight:600;font-size:13px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:all .15s}
+.btn-eliminar:hover{background:#ffe0e0;border-color:#c02828}
+/* Modal edición */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 32px;max-width:520px;width:100%;box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:20px;color:var(--text)}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-field{display:flex;flex-direction:column;gap:4px}
+.modal-field label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.modal-field input,.modal-field select{padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;background:var(--surface);color:var(--text);outline:none}
+.modal-field input:focus,.modal-field select:focus{border-color:var(--accent)}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+
 /* BARCODE SCANNER */
 .barcode-panel{background:linear-gradient(135deg,#1e1228,#2d1f42);border:1.5px solid rgba(155,109,208,.3);border-radius:10px;padding:18px 20px;margin-bottom:20px;display:flex;align-items:center;gap:16px}
 .barcode-icon-wrap{width:44px;height:44px;background:rgba(107,63,160,.25);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -556,6 +577,37 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
       </table>
     </div>
     <div style="margin-top:10px;font-size:12px;color:var(--dim)" id="consulta-count"></div>
+    <div class="consulta-actions" id="consulta-actions">
+      <span class="consulta-sel-count" id="consulta-sel-count"></span>
+      <button class="btn-modificar" onclick="abrirModalModificar()">✏️ Modificar</button>
+      <button class="btn-eliminar" onclick="confirmarEliminar()">🗑️ Eliminar seleccionados</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDICIÓN -->
+<div class="modal-overlay" id="modal-edicion" style="display:none" onclick="if(event.target===this)cerrarModal()">
+  <div class="modal-box">
+    <div class="modal-title">✏️ Modificar insumo</div>
+    <div class="modal-grid">
+      <div class="modal-field" style="grid-column:1/-1"><label>Nombre</label><input id="me-nombre" type="text"></div>
+      <div class="modal-field"><label>N° Catálogo</label><input id="me-catalogo" type="text"></div>
+      <div class="modal-field"><label>N° Lote</label><input id="me-lote" type="text"></div>
+      <div class="modal-field"><label>Fecha llegada</label><input id="me-fecha" type="date"></div>
+      <div class="modal-field"><label>Vencimiento</label><input id="me-venc" type="date"></div>
+      <div class="modal-field"><label>Temperatura</label>
+        <select id="me-temp">
+          <option>Ambiente</option><option>-20°C</option><option>-30 a -10</option><option>-80°C</option><option>2 a 8°C</option>
+        </select>
+      </div>
+      <div class="modal-field"><label>Inicio consumo</label><input id="me-inicio" type="date"></div>
+      <div class="modal-field"><label>Fin consumo</label><input id="me-fin" type="date"></div>
+      <div class="modal-field" style="grid-column:1/-1"><label>Observaciones</label><input id="me-obs" type="text"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarModificacion()">Guardar cambios</button>
+    </div>
   </div>
 </div>
 
@@ -810,24 +862,64 @@ function setSyncState(state, label) {
 // ═══════════════════════════════════════════════════════════════
 // SHEETS API — WRITE (Alta)
 // ═══════════════════════════════════════════════════════════════
+async function getSheetId(sheetName) {
+  const meta = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: SHEET_ID });
+  const sheet = meta.result.sheets.find(s => s.properties.title === sheetName);
+  return sheet ? sheet.properties.sheetId : null;
+}
+
 async function writeRowsToSheet(sheetName, rows) {
-  // rows = array of arrays: [fecha, nombre, catalogo, lote, vencimiento, inicio, fin, temp, rendimiento, obs]
-  // We write to columns B:K (prepend empty for A checkbox)
-  const values = rows.map(r => ['', ...r]); // col A stays empty
-  await gapi.client.sheets.spreadsheets.values.append({
+  // Find the last row that actually has data (to avoid the checkbox rows gap)
+  const readResp = await gapi.client.sheets.spreadsheets.values.get({
     spreadsheetId: SHEET_ID,
-    range: `${sheetName}!A:K`,
+    range: `${sheetName}!B:B`,
+  });
+  const colB = readResp.result.values || [];
+  // lastDataRow = last row index (1-based) that has content in col B
+  let lastDataRow = 0;
+  for (let i = colB.length - 1; i >= 0; i--) {
+    if (colB[i] && colB[i][0] && colB[i][0].toString().trim() !== '') {
+      lastDataRow = i + 1; // 1-based
+      break;
+    }
+  }
+  const insertAfter = Math.max(lastDataRow, 1); // at minimum after row 1 (header)
+
+  const sheetId = await getSheetId(sheetName);
+
+  // Insert blank rows right after last data row
+  await gapi.client.sheets.spreadsheets.batchUpdate({
+    spreadsheetId: SHEET_ID,
+    resource: {
+      requests: [{
+        insertDimension: {
+          range: { sheetId, dimension: 'ROWS', startIndex: insertAfter, endIndex: insertAfter + rows.length },
+          inheritFromBefore: true // copy format from row above
+        }
+      }]
+    }
+  });
+
+  // Write data into the newly inserted rows (B:K, leave A for checkbox)
+  const startRow = insertAfter + 1; // 1-based for range notation
+  await gapi.client.sheets.spreadsheets.values.update({
+    spreadsheetId: SHEET_ID,
+    range: `${sheetName}!B${startRow}:K${startRow + rows.length - 1}`,
     valueInputOption: 'USER_ENTERED',
-    insertDataOption: 'INSERT_ROWS',
-    resource: { values }
+    resource: { values: rows }
   });
 }
 
 async function ensureSheetExists(year) {
-  if (sheetNames.includes(year)) return false; // already exists
+  if (sheetNames.includes(year)) return false;
 
-  // Create new sheet tab
-  await gapi.client.sheets.spreadsheets.batchUpdate({
+  // Find sheetId of an existing year sheet to copy format from
+  const meta = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: SHEET_ID });
+  const existing = meta.result.sheets.find(s => /^\d{4}$/.test(s.properties.title));
+  const sourceSheetId = existing ? existing.properties.sheetId : null;
+
+  // Create new sheet
+  const addResp = await gapi.client.sheets.spreadsheets.batchUpdate({
     spreadsheetId: SHEET_ID,
     resource: {
       requests: [{
@@ -840,8 +932,25 @@ async function ensureSheetExists(year) {
       }]
     }
   });
+  const newSheetId = addResp.result.replies[0].addSheet.properties.sheetId;
 
-  // Write header row (same as other sheets)
+  // Copy format from row 1 of an existing sheet if available
+  if (sourceSheetId !== null) {
+    await gapi.client.sheets.spreadsheets.batchUpdate({
+      spreadsheetId: SHEET_ID,
+      resource: {
+        requests: [{
+          copyPaste: {
+            source: { sheetId: sourceSheetId, startRowIndex: 0, endRowIndex: 2, startColumnIndex: 0, endColumnIndex: 12 },
+            destination: { sheetId: newSheetId, startRowIndex: 0, endRowIndex: 2, startColumnIndex: 0, endColumnIndex: 12 },
+            pasteType: 'PASTE_FORMAT'
+          }
+        }]
+      }
+    });
+  }
+
+  // Write header row
   await gapi.client.sheets.spreadsheets.values.update({
     spreadsheetId: SHEET_ID,
     range: `${year}!B1:K1`,
@@ -851,7 +960,7 @@ async function ensureSheetExists(year) {
 
   sheetNames.push(year);
   sheetNames.sort();
-  return true; // was created
+  return true;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1152,13 +1261,13 @@ async function confirmarAlta() {
     await writeRowsToSheet(año, rows);
 
     if (esNueva) {
-      toast(`✦ Hoja "${año}" creada automáticamente — ${cantidad} insumo${cantidad>1?'s':''} registrado${cantidad>1?'s':''}`);
+      toast(`✦ Hoja "${año}" creada — ${cantidad} insumo${cantidad>1?'s':''} registrado${cantidad>1?'s':''}`);
     } else {
       toast(`✓ ${cantidad} unidad${cantidad>1?'es':''} registrada${cantidad>1?'s':''} en hoja ${año}`);
     }
 
     limpiarAlta();
-    await syncFromSheets(); // reload data
+    await syncFromSheets(); // reload data (also picks up new sheets)
   } catch(e) {
     console.error(e);
     toast('Error al escribir en Sheets: '+(e.result?.error?.message||e.message), 'error');
@@ -1393,7 +1502,7 @@ function renderConsulta() {
   tbody.innerHTML=items.map(i=>{
     const e=getEstado(i), rc=e==='baja'?'row-baja':'row-disponible';
     const uso=i.inicioConsumo?(i.finConsumo?`${i.inicioConsumo} → ${i.finConsumo}`:`Desde ${i.inicioConsumo}`):'—';
-    return `<tr class="${rc}">
+    return `<tr class="${rc}" data-id="${i.id}" onclick="toggleConsultaSelect(${i.id},this)">
       <td>${i.nombre}</td><td><span class="mono">${i.catalogo}</span></td>
       <td><span class="lote-badge">${i.lote}</span></td><td>${yearBadge(getAnio(i))}</td>
       <td>${fmtFecha(i.fecha)}</td><td>${fmtFecha(i.vencimiento)}</td>
@@ -1402,6 +1511,136 @@ function renderConsulta() {
     </tr>`;
   }).join('');
   count.textContent=`Mostrando ${items.length} insumo${items.length!==1?'s':''} · ${consultaYear==='todos'?'Todos los años':'Hoja '+consultaYear}`;
+  updateConsultaActions();
+}
+
+let consultaSelected = new Set(); // ids seleccionados
+
+function toggleConsultaSelect(id, tr) {
+  if (consultaSelected.has(id)) {
+    consultaSelected.delete(id);
+    tr.classList.remove('selected-row');
+  } else {
+    consultaSelected.add(id);
+    tr.classList.add('selected-row');
+  }
+  updateConsultaActions();
+}
+
+function updateConsultaActions() {
+  const n = consultaSelected.size;
+  const bar = document.getElementById('consulta-actions');
+  const lbl = document.getElementById('consulta-sel-count');
+  if (n === 0) { bar.classList.remove('show'); return; }
+  bar.classList.add('show');
+  lbl.textContent = `${n} insumo${n>1?'s':''} seleccionado${n>1?'s':''}`;
+  // Modificar solo disponible con 1 seleccionado
+  document.querySelector('.btn-modificar').style.display = n === 1 ? '' : 'none';
+}
+
+function abrirModalModificar() {
+  if (consultaSelected.size !== 1) return;
+  const id = [...consultaSelected][0];
+  const i = stock.find(x => x.id === id);
+  if (!i) return;
+  const toInput = str => {
+    if (!str) return '';
+    if (str.includes('/')) { const [d,m,y]=str.split('/'); return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`; }
+    return str;
+  };
+  document.getElementById('me-nombre').value = i.nombre;
+  document.getElementById('me-catalogo').value = i.catalogo;
+  document.getElementById('me-lote').value = i.lote;
+  document.getElementById('me-fecha').value = toInput(i.fecha);
+  document.getElementById('me-venc').value = toInput(i.vencimiento);
+  document.getElementById('me-temp').value = i.tempAlmacen;
+  document.getElementById('me-inicio').value = toInput(i.inicioConsumo);
+  document.getElementById('me-fin').value = toInput(i.finConsumo);
+  document.getElementById('me-obs').value = i.obs;
+  document.getElementById('modal-edicion').style.display = 'flex';
+}
+
+function cerrarModal() {
+  document.getElementById('modal-edicion').style.display = 'none';
+}
+
+async function guardarModificacion() {
+  const id = [...consultaSelected][0];
+  const item = stock.find(x => x.id === id);
+  if (!item) return;
+  item.nombre       = document.getElementById('me-nombre').value.trim();
+  item.catalogo     = document.getElementById('me-catalogo').value.trim();
+  item.lote         = document.getElementById('me-lote').value.trim();
+  item.fecha        = toSheetDate(document.getElementById('me-fecha').value);
+  item.vencimiento  = toSheetDate(document.getElementById('me-venc').value);
+  item.tempAlmacen  = document.getElementById('me-temp').value;
+  item.inicioConsumo= toSheetDate(document.getElementById('me-inicio').value);
+  item.finConsumo   = toSheetDate(document.getElementById('me-fin').value);
+  item.obs          = document.getElementById('me-obs').value.trim();
+  cerrarModal();
+  const btn = document.querySelector('.btn-modificar');
+  btn.textContent = 'Guardando…'; btn.disabled = true;
+  try {
+    const sheetRow = item.rowIndex + 1;
+    await gapi.client.sheets.spreadsheets.values.update({
+      spreadsheetId: SHEET_ID,
+      range: `${item.sheetName}!B${sheetRow}:K${sheetRow}`,
+      valueInputOption: 'USER_ENTERED',
+      resource: { values: [[
+        item.fecha, item.nombre, item.catalogo, item.lote, item.vencimiento,
+        item.inicioConsumo, item.finConsumo, item.tempAlmacen, item.rendimiento, item.obs
+      ]] }
+    });
+    toast('✓ Insumo modificado correctamente', 'success');
+    consultaSelected.clear();
+    await syncFromSheets();
+  } catch(e) {
+    toast('Error al guardar: ' + (e.result?.error?.message || e.message), 'error');
+  } finally {
+    btn.textContent = '✏️ Modificar'; btn.disabled = false;
+  }
+}
+
+async function confirmarEliminar() {
+  const n = consultaSelected.size;
+  if (!n) return;
+  const nombres = [...consultaSelected].map(id => stock.find(x=>x.id===id)?.nombre || '').join(', ');
+  if (!confirm(`¿Eliminár ${n} insumo${n>1?'s':''}?
+
+${nombres}
+
+Esta acción no se puede deshacer.`)) return;
+
+  const btn = document.querySelector('.btn-eliminar');
+  btn.textContent = 'Eliminando…'; btn.disabled = true;
+  try {
+    // Group by sheet, sort rows descending to delete from bottom up (avoid index shift)
+    const toDelete = [...consultaSelected].map(id => stock.find(x=>x.id===id)).filter(Boolean);
+    const bySheet = {};
+    toDelete.forEach(i => {
+      if (!bySheet[i.sheetName]) bySheet[i.sheetName] = [];
+      bySheet[i.sheetName].push(i.rowIndex + 1); // actual sheet row
+    });
+    for (const [sheetName, rows] of Object.entries(bySheet)) {
+      const sheetId = await getSheetId(sheetName);
+      const sortedDesc = rows.slice().sort((a,b)=>b-a);
+      for (const row of sortedDesc) {
+        await gapi.client.sheets.spreadsheets.batchUpdate({
+          spreadsheetId: SHEET_ID,
+          resource: { requests: [{ deleteDimension: {
+            range: { sheetId, dimension: 'ROWS', startIndex: row - 1, endIndex: row }
+          }}]}
+        });
+      }
+    }
+    toast(`🗑️ ${n} insumo${n>1?'s':''} eliminado${n>1?'s':''}`, 'success');
+    consultaSelected.clear();
+    await syncFromSheets();
+  } catch(e) {
+    toast('Error al eliminar: ' + (e.result?.error?.message || e.message), 'error');
+  } finally {
+    btn.textContent = '🗑️ Eliminar seleccionados'; btn.disabled = false;
+  }
 }
 
 // BARCODE / QR SCANNER
