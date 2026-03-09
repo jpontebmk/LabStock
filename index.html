@@ -2177,7 +2177,7 @@ async function ensureLogSheet() {
   });
 }
 
-async async function writeLog(accion, item, detalle = '') {
+async function writeLog(accion, item, detalle = '') {
   try {
     await ensureLogSheet();
     const usuario = document.getElementById('user-email')?.textContent || 'desconocido';
