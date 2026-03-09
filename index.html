@@ -896,9 +896,16 @@ async function afterLogin() {
 
     // ── Whitelist de usuarios autorizados ──────────────────────
     const ALLOWED_EMAILS = [
+      'cvelez@biomakers.net',
+      'gestradafernandez@biomakers.net',
+      'jmolivera@biomakers.net',
       'jponte@biomakers.net',
-      // Agregar más emails autorizados acá:
-      // 'otro@ejemplo.com',
+      'lespeche@biomakers.net',
+      'lmoon@biomakers.net',
+      'mbaratta@biomakers.net',
+      'mcadagan@biomakers.net',
+      'mflorenciacantarella@biomakers.net',
+      'pcugitachi@biomakers.net',
     ];
     if (info.email && !ALLOWED_EMAILS.includes(info.email.toLowerCase())) {
       document.getElementById('loading-overlay').style.display = 'none';
