@@ -67,6 +67,20 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .page-title{font-size:22px;font-weight:600;color:var(--text);letter-spacing:-.3px}
 .page-desc{font-size:13px;color:var(--mid);margin-top:4px}
 
+/* ALERT BANNERS */
+.alert-banner{border-radius:10px;padding:14px 18px;display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.alert-banner.amber{background:var(--amber-l);border:1px solid #e8c060}
+.alert-banner.red{background:var(--red-l);border:1px solid #e8a090}
+.alert-banner-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.alert-banner-body{flex:1}
+.alert-banner-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.alert-banner-list{font-size:12px;color:var(--mid);line-height:1.9}
+.alert-banner-list .al-cat{font-family:'IBM Plex Mono',monospace;font-size:11px;background:rgba(0,0,0,.07);padding:1px 5px;border-radius:3px;margin-right:4px}
+.alert-close{background:none;border:none;cursor:pointer;color:var(--dim);font-size:15px;padding:2px 4px;flex-shrink:0;margin-left:auto;line-height:1;transition:color .15s}
+.alert-close:hover{color:var(--text)}
+#alert-container{display:none}
+#alert-container.has-alerts{display:block}
+
 /* SYNC INDICATOR */
 .sync-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--border);border-radius:6px;background:var(--surface);font-size:12px;font-weight:500;color:var(--mid);cursor:pointer;transition:all .15s;font-family:'IBM Plex Sans',sans-serif}
 .sync-btn:hover{background:var(--surface2)}
@@ -125,6 +139,21 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .btn-ghost{background:transparent;color:var(--mid);border:1px solid var(--border)}
 .btn-ghost:hover{background:var(--surface2);color:var(--text)}
 .btn-row{display:flex;gap:10px;margin-top:20px;align-items:center}
+.btn-export{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid var(--border);border-radius:6px;background:var(--surface);font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:500;color:var(--mid);cursor:pointer;transition:all .15s}
+.btn-export:hover{background:var(--surface2);color:var(--text)}
+.btn-export-xlsx{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-export-xlsx:hover{background:var(--accent-d)}
+
+/* BAJA SEARCH UNIFIED */
+.baja-search-wrap{position:relative}
+.baja-search-wrap .search-icon-abs{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none}
+.baja-search-unified{width:100%;padding:10px 12px 10px 38px;border:1.5px solid var(--border);border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s,box-shadow .15s}
+.baja-search-unified:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-l)}
+.baja-match-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;flex-shrink:0}
+.baja-match-exacto{background:var(--accent-l);color:var(--accent)}
+.baja-match-similar{background:var(--amber-l);color:var(--amber)}
+.baja-match-lote{background:var(--blue-l);color:var(--blue)}
+mark{background:transparent;color:var(--accent);font-weight:700}
 
 /* BADGES */
 .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.3px}
@@ -244,6 +273,19 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .btn-eliminar{padding:9px 18px;background:#fff0f0;border:1.5px solid rgba(200,40,40,.3);border-radius:7px;color:#c02828;font-weight:600;font-size:13px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:all .15s}
 .btn-eliminar:hover{background:#ffe0e0;border-color:#c02828}
 /* Modal edición */
+/* HISTORY */
+.history-list{display:flex;flex-direction:column}
+.history-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border2)}
+.history-item:last-child{border-bottom:none}
+.history-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.history-dot.create{background:#2ecc71}
+.history-dot.modify{background:var(--accent)}
+.history-dot.baja{background:var(--red)}
+.history-action{font-size:13px;font-weight:500;color:var(--text)}
+.history-meta{font-size:11px;color:var(--dim);margin-top:1px}
+.history-detail{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--mid);margin-top:3px;background:var(--surface2);padding:2px 7px;border-radius:4px;display:inline-block}
+.history-empty{font-size:12px;color:var(--dim);text-align:center;padding:16px 0}
+
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
 .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 32px;max-width:520px;width:100%;box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto}
 .modal-title{font-size:16px;font-weight:600;margin-bottom:20px;color:var(--text)}
@@ -383,6 +425,7 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
       <span id="sync-label">Sincronizar</span>
     </button>
   </div>
+  <div id="alert-container"></div>
   <div id="dash-year-tabs" class="year-tabs-bar"></div>
   <div class="stats-row">
     <div class="stat-card blue"><div class="stat-value" id="stat-total">—</div><div class="stat-label">Total insumos</div></div>
@@ -521,24 +564,14 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
   </div>
   <div class="card">
     <div class="card-title">Búsqueda</div>
-    <div class="form-grid cols3">
-      <div class="field">
-        <label>Tipo de búsqueda</label>
-        <select id="baja-tipo" onchange="onBajaTipoChange()">
-          <option value="nombre">Por nombre</option>
-          <option value="catalogo">Por N° Catálogo</option>
-          <option value="lote">Por N° Lote</option>
-          <option value="fecha">Por fecha de llegada</option>
-        </select>
+    <div class="field">
+      <div class="baja-search-wrap">
+        <svg class="search-icon-abs" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" class="baja-search-unified" id="baja-search-input"
+          placeholder="Nombre, catálogo o lote…"
+          oninput="buscarBaja()" autocomplete="off" spellcheck="false">
       </div>
-      <div class="field" id="baja-text-wrap">
-        <label id="baja-search-label">Término de búsqueda</label>
-        <input type="text" id="baja-search-input" placeholder="Escribí para buscar…" oninput="buscarBaja()">
-      </div>
-      <div class="field" id="baja-date-wrap" style="display:none">
-        <label>Fecha de llegada</label>
-        <input type="date" id="baja-search-date" onchange="buscarBaja()">
-      </div>
+      <span class="hint" style="margin-top:6px">Buscá por cualquier campo. Tolerancia a errores en nombre y catálogo; exacto en lote.</span>
     </div>
     <div id="baja-results" class="baja-results">
       <div id="baja-list"></div>
@@ -582,6 +615,16 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
     <div class="page-header-left">
       <div class="page-title">Consultas</div>
       <div class="page-desc">Todos los años incluidos por defecto.</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn-export" onclick="exportarCSV()" title="Exportar CSV">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        CSV
+      </button>
+      <button class="btn-export btn-export-xlsx" onclick="exportarXLSX()" title="Exportar Excel">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Excel
+      </button>
     </div>
   </div>
   <div class="card">
@@ -649,7 +692,19 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
       <div class="modal-field"><label>Fin consumo</label><input id="me-fin" type="date"></div>
       <div class="modal-field" style="grid-column:1/-1"><label>Observaciones</label><input id="me-obs" type="text"></div>
     </div>
-    <div class="modal-btns">
+    <div style="margin-top:20px">
+      <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px">
+        <button id="modal-tab-editar" onclick="switchModalTab('editar')" style="padding:8px 16px;border:none;background:none;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px;transition:all .15s">Editar</button>
+        <button id="modal-tab-historial" onclick="switchModalTab('historial')" style="padding:8px 16px;border:none;background:none;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;color:var(--dim);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s">Historial</button>
+      </div>
+      <div id="modal-panel-editar">
+        <!-- campos del form ya existentes arriba -->
+      </div>
+      <div id="modal-panel-historial" style="display:none">
+        <div id="modal-history-list" class="history-list"></div>
+      </div>
+    </div>
+    <div class="modal-btns" id="modal-btns-editar">
       <button class="btn btn-ghost" onclick="cerrarModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarModificacion()">Guardar cambios</button>
     </div>
@@ -661,6 +716,8 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 </div>
 
 <div class="toast-container" id="toast-container"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
@@ -1202,8 +1259,69 @@ function setAltaFechaHoy() {
 }
 
 function renderAll() {
+  renderAlertasVencimiento();
   renderDashboard();
   renderConsulta();
+}
+
+// ── Alertas de vencimiento ────────────────────────────────────
+function renderAlertasVencimiento() {
+  const container = document.getElementById('alert-container');
+  if (!container) return;
+
+  const hoy = new Date();
+  const en30 = new Date(hoy.getTime() + 30*24*60*60*1000);
+
+  const vencidos = stock.filter(i => {
+    if (getEstado(i) === 'baja') return false;
+    const v = i.vencimiento?.trim();
+    if (!v || v.toUpperCase() === 'NA') return false;
+    return getEstado(i) === 'vencido';
+  });
+
+  const proximos = stock.filter(i => {
+    if (getEstado(i) === 'baja') return false;
+    return getEstado(i) === 'vence';
+  });
+
+  let html = '';
+  if (vencidos.length) {
+    const lista = vencidos.slice(0,5).map(i =>
+      `<div><span class="al-cat">${htmlEsc(i.catalogo)}</span>${htmlEsc(i.nombre)} — venció ${fmtFecha(i.vencimiento)}</div>`
+    ).join('');
+    const mas = vencidos.length > 5 ? `<div style="color:var(--dim);font-style:italic">+ ${vencidos.length-5} más…</div>` : '';
+    html += `<div class="alert-banner red" id="alert-vencidos">
+      <div class="alert-banner-icon">⚠️</div>
+      <div class="alert-banner-body">
+        <div class="alert-banner-title">${vencidos.length} insumo${vencidos.length>1?'s':''} vencido${vencidos.length>1?'s':''} sin dar de baja</div>
+        <div class="alert-banner-list">${lista}${mas}</div>
+      </div>
+      <button class="alert-close" onclick="this.closest('.alert-banner').remove();checkAlertContainer()">✕</button>
+    </div>`;
+  }
+
+  if (proximos.length) {
+    const lista = proximos.slice(0,5).map(i =>
+      `<div><span class="al-cat">${htmlEsc(i.catalogo)}</span>${htmlEsc(i.nombre)} — vence ${fmtFecha(i.vencimiento)}</div>`
+    ).join('');
+    const mas = proximos.length > 5 ? `<div style="color:var(--dim);font-style:italic">+ ${proximos.length-5} más…</div>` : '';
+    html += `<div class="alert-banner amber" id="alert-proximos">
+      <div class="alert-banner-icon">⏳</div>
+      <div class="alert-banner-body">
+        <div class="alert-banner-title">${proximos.length} insumo${proximos.length>1?'s':''} vence${proximos.length===1?'':'n'} en los próximos 60 días</div>
+        <div class="alert-banner-list">${lista}${mas}</div>
+      </div>
+      <button class="alert-close" onclick="this.closest('.alert-banner').remove();checkAlertContainer()">✕</button>
+    </div>`;
+  }
+
+  container.innerHTML = html;
+  container.classList.toggle('has-alerts', !!(vencidos.length || proximos.length));
+}
+
+function checkAlertContainer() {
+  const c = document.getElementById('alert-container');
+  if (c && !c.querySelector('.alert-banner')) c.classList.remove('has-alerts');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1419,8 +1537,12 @@ async function confirmarAlta() {
       toast(`✓ ${cantidad} unidad${cantidad>1?'es':''} registrada${cantidad>1?'s':''} en hoja ${año}`);
     }
 
+    for (let li = 0; li < cantidad; li++) {
+      await writeLog('Alta', { nombre, catalogo, lote: `${lote} ${getLetter(li)}` },
+        `Venc: ${sinVenc ? 'NA' : toSheetDate(venc)} · Temp: ${temp} · Hoja: ${año}`);
+    }
     limpiarAlta();
-    await syncFromSheets(); // reload data (also picks up new sheets)
+    await syncFromSheets();
   } catch(e) {
     console.error(e);
     toast('Error al escribir en Sheets: '+(e.result?.error?.message||e.message), 'error');
@@ -1446,57 +1568,75 @@ function limpiarAlta() {
 // ═══════════════════════════════════════════════════════════════
 // BAJA
 // ═══════════════════════════════════════════════════════════════
-function onBajaTipoChange() {
-  const tipo = document.getElementById('baja-tipo').value;
-  const isFecha = tipo==='fecha';
-  document.getElementById('baja-text-wrap').style.display = isFecha?'none':'flex';
-  document.getElementById('baja-date-wrap').style.display = isFecha?'flex':'none';
-  const labels = {nombre:'Nombre del insumo',catalogo:'N° Catálogo',lote:'N° Lote'};
-  document.getElementById('baja-search-label').textContent = labels[tipo]||'Término';
-  document.getElementById('baja-results').classList.remove('show');
-  document.getElementById('baja-form-card').classList.remove('show');
-  bajaSelectedId = null;
+// ── Fuzzy search helpers ──────────────────────────────────────
+function fuzzyScore(str, query) {
+  str = str.toLowerCase(); query = query.toLowerCase();
+  if (str.includes(query)) return 1.0;
+  let si=0, qi=0, score=0;
+  while (si<str.length && qi<query.length) {
+    if (str[si]===query[qi]) { score++; qi++; }
+    si++;
+  }
+  if (qi<query.length) return 0;
+  return score / Math.max(str.length, query.length);
+}
+
+function highlightMatch(str, query) {
+  if (!query) return htmlEsc(str);
+  const s = htmlEsc(str), q = query.toLowerCase();
+  const idx = s.toLowerCase().indexOf(q);
+  if (idx >= 0) return s.slice(0,idx) + '<mark>' + s.slice(idx, idx+q.length) + '</mark>' + s.slice(idx+q.length);
+  return s;
 }
 
 function buscarBaja() {
-  const tipo = document.getElementById('baja-tipo').value;
-  const q = tipo==='fecha'
-    ? document.getElementById('baja-search-date').value
-    : document.getElementById('baja-search-input').value.trim().toLowerCase();
-  if (!q) { document.getElementById('baja-results').classList.remove('show'); return; }
-
-  let results = stock.filter(i => {
-    if (getEstado(i)==='baja') return false;
-    if (tipo==='nombre')   return i.nombre.toLowerCase().includes(q);
-    if (tipo==='catalogo') return i.catalogo.toLowerCase().includes(q);
-    if (tipo==='lote')     return i.lote.toLowerCase().includes(q);
-    if (tipo==='fecha') {
-      const fq = q.split('-').reverse().join('/');
-      return i.fecha===q || i.fecha===fq;
-    }
-    return false;
-  });
-
+  const q = document.getElementById('baja-search-input').value.trim();
   const list = document.getElementById('baja-list');
+  const resultsEl = document.getElementById('baja-results');
+  if (q.length < 2) { resultsEl.classList.remove('show'); bajaSelectedId=null; return; }
+  const ql = q.toLowerCase();
+
+  const scored = [];
+  for (const i of stock) {
+    if (getEstado(i)==='baja') continue;
+    // Lote: solo exact substring
+    const loteMatch = i.lote.toLowerCase().includes(ql);
+    // Nombre y catálogo: fuzzy
+    const nombreScore  = fuzzyScore(i.nombre, q);
+    const catScore     = fuzzyScore(i.catalogo, q);
+    const score = loteMatch ? 1.0 : Math.max(nombreScore, catScore);
+    if (score > 0.28 || loteMatch) scored.push({i, score, loteMatch, nombreScore, catScore});
+  }
+  scored.sort((a,b) => b.score - a.score);
+
+  let results = scored.map(s => s.i);
+
   list.innerHTML = results.length
-    ? results.map(i=>`
-        <div class="insumo-row" id="row-${i.id}" onclick="selectBaja(${i.id})">
+    ? scored.map(({i, score, loteMatch, nombreScore, catScore})=>{
+        const pct = Math.round(score*100);
+        let matchLabel, matchClass;
+        if (loteMatch)       { matchLabel='lote';    matchClass='baja-match-lote'; }
+        else if (pct >= 90)  { matchLabel='exacto';  matchClass='baja-match-exacto'; }
+        else                 { matchLabel='similar'; matchClass='baja-match-similar'; }
+        return `<div class="insumo-row" id="row-${i.id}" onclick="selectBaja(${i.id})">
           <div class="insumo-row-icon">🧪</div>
           <div class="insumo-row-info">
-            <div class="insumo-row-name">${htmlEsc(i.nombre)}</div>
+            <div class="insumo-row-name">${highlightMatch(i.nombre, nombreScore>=catScore && !loteMatch ? q : '')}</div>
             <div class="insumo-row-cols">
-              <div class="insumo-row-col"><span class="insumo-row-col-label">Catálogo</span><span class="insumo-row-col-val">${htmlEsc(i.catalogo)}</span></div>
+              <div class="insumo-row-col"><span class="insumo-row-col-label">Catálogo</span><span class="insumo-row-col-val">${highlightMatch(i.catalogo, catScore>nombreScore && !loteMatch ? q : '')}</span></div>
               <div class="insumo-row-divider"></div>
-              <div class="insumo-row-col"><span class="insumo-row-col-label">Lote</span><span class="insumo-row-col-val">${htmlEsc(i.lote)}</span></div>
+              <div class="insumo-row-col"><span class="insumo-row-col-label">Lote</span><span class="insumo-row-col-val">${highlightMatch(i.lote, loteMatch ? q : '')}</span></div>
               <div class="insumo-row-divider"></div>
               <div class="insumo-row-col"><span class="insumo-row-col-label">Llegada</span><span class="insumo-row-col-val">${fmtFecha(i.fecha)}</span></div>
             </div>
           </div>
+          <span class="baja-match-badge ${matchClass}">${matchLabel}</span>
           <div class="check-circle"><span class="check-icon">✓</span></div>
-        </div>`).join('')
+        </div>`;
+      }).join('')
     : '<div class="empty-state"><span class="es-icon">🔍</span><p>No se encontraron insumos disponibles</p></div>';
 
-  document.getElementById('baja-results').classList.add('show');
+  resultsEl.classList.add('show');
   document.getElementById('baja-form-card').classList.remove('show');
   bajaSelectedId = null;
 }
@@ -1536,9 +1676,11 @@ async function confirmarBaja() {
     item.obs           = obs;
     await updateRowInSheet(item);
     toast(`✓ Baja registrada: "${item.nombre}" — Lote ${item.lote}`);
+    await writeLog('Baja', item,
+      `Inicio: ${item.inicioConsumo||'—'} · Fin: ${item.finConsumo||'—'} · Rend: ${item.rendimiento||'—'}`);
     cancelarBaja();
     document.getElementById('baja-results').classList.remove('show');
-    document.getElementById('baja-search-input').value='';
+    const bsi = document.getElementById('baja-search-input'); if(bsi) bsi.value='';
     await syncFromSheets();
   } catch(e) {
     console.error(e);
@@ -1823,6 +1965,8 @@ async function guardarModificacion() {
       ]] }
     });
     toast('✓ Insumo modificado correctamente', 'success');
+    await writeLog('Modificación', item,
+      `Temp: ${item.tempAlmacen} · Venc: ${item.vencimiento} · Fin: ${item.finConsumo||'—'}`);
     consultaSelected.clear();
     updateConsultaActions();
     await syncFromSheets();
@@ -2004,7 +2148,180 @@ window.showPage = function(id) {
   _showPage(id);
   if (id === 'alta') setTimeout(() => { const b = document.getElementById('barcode-input'); if(b) b.focus(); }, 200);
 };
+
+// ═══════════════════════════════════════════════════════════════
+// FEATURE 2 — HISTORIAL POR INSUMO (LOG en Google Sheets)
+// ═══════════════════════════════════════════════════════════════
+const LOG_SHEET = 'LOG';
+
+async function ensureLogSheet() {
+  const meta = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: SHEET_ID });
+  const exists = meta.result.sheets.some(s => s.properties.title === LOG_SHEET);
+  if (exists) return;
+  await gapi.client.sheets.spreadsheets.batchUpdate({
+    spreadsheetId: SHEET_ID,
+    resource: { requests: [{ addSheet: { properties: { title: LOG_SHEET, gridProperties: { rowCount: 5000, columnCount: 7 } } } }] }
+  });
+  await gapi.client.sheets.spreadsheets.values.update({
+    spreadsheetId: SHEET_ID,
+    range: `${LOG_SHEET}!A1:G1`,
+    valueInputOption: 'USER_ENTERED',
+    resource: { values: [['Timestamp','Usuario','Acción','Insumo','Catálogo','Lote','Detalle']] }
+  });
+}
+
+async async function writeLog(accion, item, detalle = '') {
+  try {
+    await ensureLogSheet();
+    const usuario = document.getElementById('user-email')?.textContent || 'desconocido';
+    const ts = new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
+    await gapi.client.sheets.spreadsheets.values.append({
+      spreadsheetId: SHEET_ID,
+      range: `${LOG_SHEET}!A:G`,
+      valueInputOption: 'USER_ENTERED',
+      insertDataOption: 'INSERT_ROWS',
+      resource: { values: [[ts, usuario, accion, item.nombre || '', item.catalogo || '', item.lote || '', detalle]] }
+    });
+  } catch(e) {
+    console.warn('Log write failed (non-critical):', e);
+  }
+}
+
+async function loadHistorial(item) {
+  const listEl = document.getElementById('modal-history-list');
+  listEl.innerHTML = '<div style="color:var(--dim);font-size:13px;padding:16px 0">Cargando historial…</div>';
+  try {
+    const resp = await gapi.client.sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: `${LOG_SHEET}!A:G`
+    });
+    const rows = (resp.result.values || []).slice(1); // skip header
+    // Filter rows matching this item's lote (most specific identifier)
+    const matching = rows.filter(r => r[5] && r[5].toString().trim() === item.lote.trim()).reverse();
+    if (!matching.length) {
+      listEl.innerHTML = '<div style="color:var(--dim);font-size:13px;padding:16px 0">Sin historial registrado para este insumo.</div>';
+      return;
+    }
+    const icons = { 'Alta': { dot: 'create', emoji: '➕' }, 'Baja': { dot: 'baja', emoji: '📤' }, 'Modificación': { dot: 'modify', emoji: '✏️' } };
+    listEl.innerHTML = matching.map(r => {
+      const [ts, usuario, accion, nombre, catalogo, lote, detalle] = r;
+      const style = icons[accion] || { dot: 'history-dot-modify', emoji: '•' };
+      return `<div class="history-item">
+        <div class="history-dot ${style.dot}"></div>
+        <div class="history-item-body">
+          <div class="history-action">${style.emoji} ${htmlEsc(accion || '—')}</div>
+          <div class="history-meta">${htmlEsc(ts || '')} · ${htmlEsc(usuario || '')}</div>
+          ${detalle ? `<div class="history-detail">${htmlEsc(detalle)}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    // LOG sheet might not exist yet
+    listEl.innerHTML = '<div style="color:var(--dim);font-size:13px;padding:16px 0">Sin historial registrado aún.</div>';
+  }
+}
+
+function switchModalTab(tab) {
+  const editPanel = document.getElementById('modal-panel-editar');
+  const histPanel = document.getElementById('modal-panel-historial');
+  const editTab   = document.getElementById('modal-tab-editar');
+  const histTab   = document.getElementById('modal-tab-historial');
+  const modalBtns = document.getElementById('modal-btns-editar');
+
+  if (tab === 'historial') {
+    editPanel.style.display = 'none';
+    histPanel.style.display = 'block';
+    modalBtns.style.display = 'none';
+    editTab.style.color = 'var(--dim)';
+    editTab.style.borderBottomColor = 'transparent';
+    histTab.style.color = 'var(--accent)';
+    histTab.style.borderBottomColor = 'var(--accent)';
+    // Load history for current item
+    const id = [...consultaSelected][0];
+    const item = stock.find(x => x.id === id);
+    if (item) loadHistorial(item);
+  } else {
+    editPanel.style.display = '';
+    histPanel.style.display = 'none';
+    modalBtns.style.display = '';
+    editTab.style.color = 'var(--accent)';
+    editTab.style.borderBottomColor = 'var(--accent)';
+    histTab.style.color = 'var(--dim)';
+    histTab.style.borderBottomColor = 'transparent';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FEATURE 3 — EXPORTAR CSV y XLSX (vista filtrada de Consultas)
+// ═══════════════════════════════════════════════════════════════
+function getConsultaItems() {
+  // Reproduce the same filter logic as renderConsulta so export = what you see
+  let items = consultaYear === 'todos' ? stock : stock.filter(i => getAnio(i) === consultaYear);
+  if (consultaQuery) items = items.filter(i =>
+    i.nombre.toLowerCase().includes(consultaQuery) ||
+    i.catalogo.toLowerCase().includes(consultaQuery) ||
+    i.lote.toLowerCase().includes(consultaQuery));
+  if (consultaFilter !== 'todos') items = items.filter(i => getEstado(i) === consultaFilter);
+  return items;
+}
+
+function buildExportRows(items) {
+  const headers = ['Insumo','N° Catálogo','N° Lote','Año','Fecha llegada','Vencimiento','Temperatura','Estado','Inicio consumo','Fin consumo','Rendimiento','Observaciones'];
+  const rows = items.map(i => [
+    i.nombre, i.catalogo, i.lote, getAnio(i),
+    fmtFecha(i.fecha), fmtFecha(i.vencimiento),
+    i.tempAlmacen, getEstado(i),
+    i.inicioConsumo || '', i.finConsumo || '',
+    i.rendimiento   || '', i.obs         || ''
+  ]);
+  return { headers, rows };
+}
+
+function exportarCSV() {
+  const items = getConsultaItems();
+  if (!items.length) { toast('No hay datos para exportar', 'error'); return; }
+  const { headers, rows } = buildExportRows(items);
+  const escape = v => `"${String(v).replace(/"/g, '""')}"`;
+  const csv = [headers, ...rows].map(r => r.map(escape).join(',')).join('\r\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  triggerDownload(blob, `labstock_${isoHoy()}.csv`);
+  toast(`✓ CSV exportado — ${items.length} insumos`);
+}
+
+function exportarXLSX() {
+  const items = getConsultaItems();
+  if (!items.length) { toast('No hay datos para exportar', 'error'); return; }
+  const { headers, rows } = buildExportRows(items);
+  try {
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    ws['!cols'] = [36, 14, 14, 6, 12, 12, 18, 12, 13, 13, 14, 22].map(w => ({ wch: w }));
+    // Bold header row
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let C = range.s.c; C <= range.e.c; C++) {
+      const cell = ws[XLSX.utils.encode_cell({ r: 0, c: C })];
+      if (cell) cell.s = { font: { bold: true }, fill: { fgColor: { rgb: 'F7F6F2' } } };
+    }
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Stock');
+    XLSX.writeFile(wb, `labstock_${isoHoy()}.xlsx`);
+    toast(`✓ Excel exportado — ${items.length} insumos`);
+  } catch(e) {
+    toast('Error al generar Excel: ' + e.message, 'error');
+  }
+}
+
+function triggerDownload(blob, filename) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+function isoHoy() { return new Date().toISOString().slice(0, 10); }
 </script>
+
+
 
 <!-- Google APIs -->
 <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
