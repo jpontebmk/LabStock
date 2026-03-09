@@ -1036,7 +1036,7 @@ async function syncFromSheets() {
 
     // 2. Read all sheets in batch
     // Hojas 2022 y 2023 no tienen checkbox en col A, los datos empiezan en A
-    const ranges = sheetNames.map(y => ['2022','2023'].includes(y) ? `${y}!A:J` : `${y}!B:K`);
+    const ranges = sheetNames.map(y => `${y}!B:K`);
     if (!ranges.length) {
       stock = [];
       stockLookup = [];
@@ -1235,11 +1235,8 @@ async function updateRowInSheet(item) {
   // rowIndex is stored as rowIdx+1 where rowIdx skips the header → it IS the 1-based sheet row
   const sheetRow = item.rowIndex;
   // 2022/2023 no tienen checkbox en col A → datos empiezan en col A (F=InicioConsumo, G=FinConsumo, H=Temp, I=Rend, J=Obs)
-  // 2024+ tienen checkbox en col A → datos empiezan en col B (G=InicioConsumo, H=FinConsumo, I=Temp, J=Rend, K=Obs)
-  const legacy = ['2022','2023'].includes(item.sheetName);
-  const startCol = legacy ? 'F' : 'G';
-  const endCol   = legacy ? 'J' : 'K';
-  const range = `${item.sheetName}!${startCol}${sheetRow}:${endCol}${sheetRow}`;
+  // Datos desde col B → G=InicioConsumo, H=FinConsumo, I=Temp, J=Rend, K=Obs
+  const range = `${item.sheetName}!G${sheetRow}:K${sheetRow}`;
   await gapi.client.sheets.spreadsheets.values.update({
     spreadsheetId: SHEET_ID,
     range,
@@ -2083,15 +2080,8 @@ async function guardarModificacion() {
   try {
     const sheetRow = item.rowIndex;
     // 2022/2023: sin checkbox → datos desde col A. 2024+: datos desde col B
-    const legacySheet = ['2022','2023'].includes(item.sheetName);
-    const writeRange = legacySheet
-      ? `${item.sheetName}!A${sheetRow}:J${sheetRow}`
-      : `${item.sheetName}!B${sheetRow}:K${sheetRow}`;
-    // 2022/2023 no tienen col de checkbox — la fila empieza directo con Fecha
-    const writeValues = legacySheet
-      ? [item.fecha, item.nombre, item.catalogo, item.lote, item.vencimiento,
-         item.inicioConsumo, item.finConsumo, item.tempAlmacen, item.rendimiento, item.obs]
-      : [item.fecha, item.nombre, item.catalogo, item.lote, item.vencimiento,
+    const writeRange = `${item.sheetName}!B${sheetRow}:K${sheetRow}`;
+    const writeValues = [item.fecha, item.nombre, item.catalogo, item.lote, item.vencimiento,
          item.inicioConsumo, item.finConsumo, item.tempAlmacen, item.rendimiento, item.obs];
     await gapi.client.sheets.spreadsheets.values.update({
       spreadsheetId: SHEET_ID,
