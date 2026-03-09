@@ -609,6 +609,26 @@ mark{background:transparent;color:var(--accent);font-weight:700}
       <div class="page-desc">Buscá un insumo y registrá las fechas de uso. Se actualizará en <span class="sheet-title-ref">Google Sheets</span>.</div>
     </div>
   </div>
+  <div class="barcode-panel">
+    <div class="barcode-icon-wrap">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b98ee8" stroke-width="1.8">
+        <path d="M3 9V5a2 2 0 012-2h4M3 15v4a2 2 0 002 2h4M21 9V5a2 2 0 00-2-2h-4M21 15v4a2 2 0 01-2 2h-4"/>
+        <line x1="7" y1="4" x2="7" y2="20"/><line x1="10" y1="4" x2="10" y2="20"/>
+        <line x1="13" y1="4" x2="13" y2="20"/><line x1="16" y1="4" x2="16" y2="20"/>
+      </svg>
+    </div>
+    <div class="barcode-panel-body">
+      <div class="barcode-panel-title"><span class="barcode-pulse"></span> Lector de codigo de barras / QR</div>
+      <div class="barcode-input-row">
+        <input type="text" class="barcode-input" id="barcode-input-baja"
+          placeholder="Escaneá el código para buscar automáticamente…"
+          oninput="onBarcodeInputBaja()" onkeydown="onBarcodeKeyBaja(event)"
+          autocomplete="off" spellcheck="false">
+        <button class="barcode-btn-clear" onclick="clearBarcode('baja')">Limpiar</button>
+      </div>
+      <div class="barcode-status idle" id="barcode-status-baja">Listo - escaneá un código para buscar el insumo</div>
+    </div>
+  </div>
   <div class="card">
     <div class="card-title">Búsqueda</div>
     <div class="field">
@@ -2172,11 +2192,13 @@ function onAltaTempChange() {
 // BARCODE / QR SCANNER
 let barcodeTimer = null;
 
+let barcodeTimerBaja = null;
+
 function onBarcodeInput() {
   clearTimeout(barcodeTimer);
   barcodeTimer = setTimeout(() => {
     const val = document.getElementById('barcode-input').value.trim();
-    if (val.length >= 3) processBarcodeCode(val);
+    if (val.length >= 3) processBarcodeCode(val, 'alta');
   }, 500);
 }
 
@@ -2185,56 +2207,227 @@ function onBarcodeKey(e) {
     e.preventDefault();
     clearTimeout(barcodeTimer);
     const val = document.getElementById('barcode-input').value.trim();
-    if (val) processBarcodeCode(val);
+    if (val) processBarcodeCode(val, 'alta');
   }
 }
 
-function processBarcodeCode(code) {
-  const input = document.getElementById('barcode-input');
-  input.classList.add('flash');
-  setTimeout(() => input.classList.remove('flash'), 400);
-  const codeLow = code.toLowerCase();
-  const match =
-    stock.find(i => i.catalogo.toLowerCase() === codeLow) ||
-    stock.find(i => i.lote.toLowerCase().replace(/\s+[a-z]{1,3}$/, '') === codeLow) ||
-    stock.find(i => i.lote.toLowerCase() === codeLow) ||
-    stock.find(i => i.catalogo.toLowerCase().includes(codeLow)) ||
-    stock.find(i => i.nombre.toLowerCase().includes(codeLow));
-  if (match) {
-    document.getElementById('alta-nombre').value = match.nombre;
-    document.getElementById('alta-catalogo').value = match.catalogo;
-    const loteEl = document.getElementById('alta-lote');
-    if (!loteEl.value.trim()) loteEl.value = match.lote.replace(/\s+[A-Z]{1,3}$/, '').trim();
-    const temp = document.getElementById('alta-temp');
-    inferAndSetTemp(match.catalogo, match.tempAlmacen);
-    ['alta-nombre','alta-catalogo','alta-lote'].forEach(flashFill);
-    const el = document.getElementById('barcode-status');
-    el.className = 'barcode-status found';
-    el.textContent = 'Encontrado: ' + match.nombre + ' - Cat: ' + match.catalogo;
-    toast('Codigo encontrado: ' + match.nombre, 'success');
+function onBarcodeInputBaja() {
+  clearTimeout(barcodeTimerBaja);
+  barcodeTimerBaja = setTimeout(() => {
+    const val = document.getElementById('barcode-input-baja').value.trim();
+    if (val.length >= 3) processBarcodeCode(val, 'baja');
+  }, 500);
+}
+
+function onBarcodeKeyBaja(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    clearTimeout(barcodeTimerBaja);
+    const val = document.getElementById('barcode-input-baja').value.trim();
+    if (val) processBarcodeCode(val, 'baja');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GS1-128 PARSER
+// ═══════════════════════════════════════════════════════════════
+// Application Identifiers (AI) con longitudes fijas o variables
+// Variables terminan en FNC1 (en texto plano, separadas por posición)
+const GS1_AI = {
+  '00': { name:'sscc',       len:18, fixed:true  },
+  '01': { name:'gtin',       len:14, fixed:true  },
+  '10': { name:'lot',        len:20, fixed:false },
+  '11': { name:'prodDate',   len:6,  fixed:true  },
+  '13': { name:'packDate',   len:6,  fixed:true  },
+  '15': { name:'bestBefore', len:6,  fixed:true  },
+  '17': { name:'expDate',    len:6,  fixed:true  },
+  '20': { name:'variant',    len:2,  fixed:true  },
+  '21': { name:'serial',     len:20, fixed:false },
+  '22': { name:'secondary',  len:29, fixed:false },
+  '240':{ name:'ref',        len:30, fixed:false },
+  '241':{ name:'custPart',   len:30, fixed:false },
+  '30': { name:'qty',        len:8,  fixed:false },
+  '37': { name:'qtyUnits',   len:8,  fixed:false },
+};
+
+// Separadores que algunas pistolas insertan entre campos variables
+const GS1_SEPARATORS = ['\x1d', '|', '\x1c'];
+
+function parseGS1(code) {
+  // Normalize: remove common separators keeping structure
+  let s = code;
+  for (const sep of GS1_SEPARATORS) s = s.split(sep).join('\x1d');
+
+  const result = {};
+  let i = 0;
+
+  while (i < s.length) {
+    // Skip FNC1 separators
+    if (s[i] === '\x1d') { i++; continue; }
+
+    // Try 3-digit AI first, then 2-digit
+    let ai = null, def = null;
+    if (GS1_AI[s.substring(i, i+3)]) {
+      ai = s.substring(i, i+3); def = GS1_AI[ai]; i += 3;
+    } else if (GS1_AI[s.substring(i, i+2)]) {
+      ai = s.substring(i, i+2); def = GS1_AI[ai]; i += 2;
+    } else {
+      i++; continue; // unknown AI, skip char
+    }
+
+    let value;
+    if (def.fixed) {
+      value = s.substring(i, i + def.len);
+      i += def.len;
+    } else {
+      // Variable: read until FNC1 separator or end, max def.len chars
+      const end = s.indexOf('\x1d', i);
+      const maxEnd = i + def.len;
+      const stopAt = end === -1 ? maxEnd : Math.min(end, maxEnd);
+      value = s.substring(i, stopAt);
+      i = stopAt;
+    }
+    result[def.name] = value;
+  }
+  return result;
+}
+
+function gs1ExpToISO(yymmdd) {
+  // YYMMDD → YYYY-MM-DD. DD=00 means last day of month
+  if (!yymmdd || yymmdd.length !== 6) return '';
+  const yy = parseInt(yymmdd.substring(0,2));
+  const mm = yymmdd.substring(2,4);
+  const dd = yymmdd.substring(4,6);
+  const year = yy <= 30 ? 2000 + yy : 1900 + yy;
+  if (dd === '00') {
+    // Last day of month
+    const lastDay = new Date(year, parseInt(mm), 0).getDate();
+    return `${year}-${mm}-${String(lastDay).padStart(2,'0')}`;
+  }
+  return `${year}-${mm}-${dd}`;
+}
+
+function extractCatalog(parsed) {
+  // REF (AI 240) is the most direct catalog number
+  if (parsed.ref) return parsed.ref.trim();
+  // Otherwise strip GTIN packaging indicator + check digit → inner product code
+  if (parsed.gtin) return parsed.gtin.substring(1, 13).replace(/^0+/, '') || parsed.gtin;
+  return '';
+}
+
+function processBarcodeCode(code, context = 'alta') {
+  const rawCode = code.trim();
+  const statusEl = document.getElementById(context === 'alta' ? 'barcode-status' : 'barcode-status-baja');
+  const inputEl  = document.getElementById(context === 'alta' ? 'barcode-input' : 'barcode-input-baja');
+
+  if (inputEl) { inputEl.classList.add('flash'); setTimeout(()=>inputEl.classList.remove('flash'), 400); }
+
+  // ── 1. Try GS1 parse ──────────────────────────────────────
+  let parsed = {};
+  let catalogFromGS1 = '';
+  let loteFromGS1    = '';
+  let vencFromGS1    = '';
+
+  if (rawCode.length > 10) {
+    parsed = parseGS1(rawCode);
+    catalogFromGS1 = extractCatalog(parsed);
+    loteFromGS1    = (parsed.lot    || '').trim();
+    vencFromGS1    = gs1ExpToISO(parsed.expDate || parsed.bestBefore || '');
+  }
+
+  // ── 2. Look up in stock (by catalog from GS1, then raw code) ──
+  const codeLow = rawCode.toLowerCase();
+  const catLow  = catalogFromGS1.toLowerCase();
+
+  let match = null;
+  if (catLow) {
+    match = stock.find(i => i.catalogo.toLowerCase() === catLow);
+  }
+  if (!match) {
+    match =
+      stock.find(i => i.catalogo.toLowerCase() === codeLow) ||
+      stock.find(i => i.lote.toLowerCase().replace(/\s+[a-zñ]{1,3}$/,'') === codeLow) ||
+      stock.find(i => i.lote.toLowerCase() === codeLow) ||
+      stock.find(i => i.catalogo.toLowerCase().includes(codeLow));
+  }
+
+  // ── 3. Fill fields depending on context ──────────────────
+  if (context === 'alta') {
+    const nombreEl  = document.getElementById('alta-nombre');
+    const catEl     = document.getElementById('alta-catalogo');
+    const loteEl    = document.getElementById('alta-lote');
+    const vencEl    = document.getElementById('alta-vencimiento');
+
+    // Catalog: GS1 > stock match > raw
+    const finalCat = catalogFromGS1 || (match ? match.catalogo : rawCode);
+    catEl.value = finalCat; flashFill('alta-catalogo');
+
+    // Lot from GS1
+    if (loteFromGS1 && !loteEl.value.trim()) { loteEl.value = loteFromGS1; flashFill('alta-lote'); }
+
+    // Expiry from GS1
+    if (vencFromGS1 && !vencEl.value) {
+      vencEl.value = vencFromGS1;
+      flashFill('alta-vencimiento');
+      document.getElementById('chk-sin-venc').checked = false;
+    }
+
+    // Name & temp from stock match
+    if (match) {
+      if (!nombreEl.value.trim()) { nombreEl.value = match.nombre; flashFill('alta-nombre'); }
+      if (!loteEl.value.trim())   { loteEl.value = match.lote.replace(/\s+[A-ZÑ]{1,3}$/,'').trim(); flashFill('alta-lote'); }
+      inferAndSetTemp(match.catalogo, match.tempAlmacen);
+    }
+
+    // Status message
+    const parts = [];
+    if (catalogFromGS1) parts.push(`Cat: ${catalogFromGS1}`);
+    if (loteFromGS1)    parts.push(`Lote: ${loteFromGS1}`);
+    if (vencFromGS1)    parts.push(`Vence: ${vencFromGS1}`);
+    if (match) parts.push(`Nombre: ${match.nombre}`);
+
+    if (statusEl) {
+      statusEl.className = 'barcode-status ' + (parts.length ? 'found' : 'notfound');
+      statusEl.textContent = parts.length
+        ? '✓ ' + parts.join('  ·  ')
+        : 'Código no reconocido — completá manualmente';
+    }
+    if (parts.length) toast('QR leído: ' + (match ? match.nombre : finalCat), 'success');
+    else toast('Código no encontrado en stock', 'info');
+
     updatePreview();
+
   } else {
-    const catEl = document.getElementById('alta-catalogo');
-    if (!catEl.value.trim()) { catEl.value = code; flashFill('alta-catalogo'); }
-    const el = document.getElementById('barcode-status');
-    el.className = 'barcode-status notfound';
-    el.textContent = 'Codigo "' + code + '" no encontrado - completa los datos manualmente';
-    toast('Codigo no encontrado en stock', 'info');
-    updatePreview();
+    // context === 'baja': trigger search with catalog or lot
+    const searchTerm = loteFromGS1 || catalogFromGS1 || rawCode;
+    const searchEl = document.getElementById('baja-search-input');
+    if (searchEl) { searchEl.value = searchTerm; buscarBaja(); }
+
+    if (statusEl) {
+      const parts = [];
+      if (catalogFromGS1) parts.push(`Cat: ${catalogFromGS1}`);
+      if (loteFromGS1)    parts.push(`Lote: ${loteFromGS1}`);
+      statusEl.className = 'barcode-status ' + (parts.length ? 'found' : 'notfound');
+      statusEl.textContent = parts.length ? '✓ ' + parts.join('  ·  ') + ' — resultados abajo' : 'Código no reconocido';
+    }
+    if (loteFromGS1 || catalogFromGS1)
+      toast('QR leído — buscando ' + (loteFromGS1 || catalogFromGS1), 'success');
   }
 }
 
-function clearBarcode() {
-  document.getElementById('barcode-input').value = '';
-  const el = document.getElementById('barcode-status');
-  el.className = 'barcode-status idle';
-  el.textContent = 'Listo - escana un codigo para autocompletar';
+function clearBarcode(context='alta') {
+  const inputId  = context==='alta' ? 'barcode-input' : 'barcode-input-baja';
+  const statusId = context==='alta' ? 'barcode-status' : 'barcode-status-baja';
+  const el = document.getElementById(inputId); if (el) el.value = '';
+  const st = document.getElementById(statusId);
+  if (st) { st.className='barcode-status idle'; st.textContent='Listo - escana un codigo para autocompletar'; }
 }
 
 const _showPage = showPage;
 window.showPage = function(id) {
   _showPage(id);
   if (id === 'alta') setTimeout(() => { const b = document.getElementById('barcode-input'); if(b) b.focus(); }, 200);
+  if (id === 'baja') setTimeout(() => { const b = document.getElementById('barcode-input-baja'); if(b) b.focus(); }, 200);
 };
 
 // ═══════════════════════════════════════════════════════════════
