@@ -1086,6 +1086,8 @@ async function syncFromSheets() {
     // consultaYear permanece en 'todos' por defecto
     setSyncState('ok', 'Sincronizado');
     toast(`✓ ${stock.length} insumos cargados de ${sheetNames.length} hoja${sheetNames.length!==1?'s':''}`);
+    // Default consultas al año más reciente
+    if (sheetNames.length) consultaYear = sheetNames[sheetNames.length - 1];
     renderAll();
   } catch(e) {
     console.error(e);
@@ -1459,7 +1461,15 @@ function renderDashboard() {
   document.getElementById('stat-baja').textContent  = filtered.filter(i=>getEstado(i)==='baja').length;
   document.getElementById('stat-vence').textContent = filtered.filter(i=>getEstado(i)==='vence').length;
   document.getElementById('stat-vencido').textContent = filtered.filter(i=>getEstado(i)==='vencido').length;
-  const sorted = [...filtered].sort((a,b)=>parseFecha(b.fecha)-parseFecha(a.fecha)).slice(0,10);
+  const sorted = [...filtered]
+    .sort((a,b) => {
+      // Primero por año de hoja descendente (2026 > 2025 > ... > 2022)
+      const yearDiff = (b.sheetName || '').localeCompare(a.sheetName || '');
+      if (yearDiff !== 0) return yearDiff;
+      // Después por fecha dentro del mismo año
+      return parseFecha(b.fecha) - parseFecha(a.fecha);
+    })
+    .slice(0, 10);
   document.getElementById('dash-tbody').innerHTML = sorted.length
     ? sorted.map(i=>`<tr>
         <td>${fmtFecha(i.fecha)}</td><td>${yearBadge(getAnio(i))}</td>
