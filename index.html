@@ -372,7 +372,7 @@ mark{background:transparent;color:var(--accent);font-weight:700}
 .fd-chip{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--surface2);color:var(--mid);transition:all .12s;user-select:none}
 .fd-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
 .fd-chip.selected{border-color:var(--accent);background:var(--accent);color:#fff}
-.fd-search{width:100%;padding:7px 11px;border:1px solid var(--border);border-radius:6px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;outline:none;background:var(--surface);margin-bottom:6px}
+.fd-search{width:100%;padding:7px 11px;border:1px solid var(--border);border-radius:6px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;outline:none;background:var(--surface);color:var(--text);margin-bottom:6px}
 .fd-search:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-l)}
 .fd-dropdown{position:absolute;top:calc(100%+2px);left:0;right:0;background:var(--surface);border:1px solid var(--accent);border-radius:6px;box-shadow:var(--shadow-lg);z-index:10;display:none;max-height:150px;overflow-y:auto}
 .fd-dropdown.show{display:block}
@@ -3071,6 +3071,7 @@ function toggleFiltroDrawer() {
   drawer.classList.toggle('show', !open);
   overlay.classList.toggle('show', !open);
   if (btn) btn.classList.toggle('active', !open);
+  if (!open) fdRenderVistas(); // refresh list when opening
 }
 
 // ── Chips dinámicos con búsqueda ──────────────────────────────
@@ -3197,8 +3198,114 @@ function limpiarFiltroPersonalizado() {
   renderConsulta();
 }
 
-// ═══════════════════════════════════════════════════════════════
-// BASE DE DATOS DE INSUMOS
+// ── Vistas guardadas ──────────────────────────────────────────
+function _vistasKey() {
+  const email = (document.getElementById('user-email')||{}).textContent || 'default';
+  return `labstock-vistas-${email}`;
+}
+function _loadVistas() {
+  try { return JSON.parse(localStorage.getItem(_vistasKey()) || '[]'); } catch(e) { return []; }
+}
+function _saveVistas(vistas) {
+  try { localStorage.setItem(_vistasKey(), JSON.stringify(vistas)); } catch(e) {}
+}
+function fdGuardarVista() {
+  const nombre = prompt('Nombre para esta vista de filtro:');
+  if (!nombre || !nombre.trim()) return;
+  const vista = {
+    nombre: nombre.trim(),
+    fecha: new Date().toLocaleDateString('es-AR'),
+    filtros: {
+      estados:    [...fpFiltros.estados],
+      catalogos:  [...fpFiltros.catalogos],
+      nombres:    [...fpFiltros.nombres],
+      lotes:      [...fpFiltros.lotes],
+      temps:      [...fpFiltros.temps],
+      fechaDesde: fpFiltros.fechaDesde,
+      fechaHasta: fpFiltros.fechaHasta,
+      vencDesde:  fpFiltros.vencDesde,
+      vencHasta:  fpFiltros.vencHasta,
+    },
+    year:   consultaYear,
+    query:  consultaQuery,
+    filter: consultaFilter,
+  };
+  const vistas = _loadVistas();
+  // Replace if same name
+  const idx = vistas.findIndex(v => v.nombre === vista.nombre);
+  if (idx >= 0) { if (!confirm(`¿Reemplazar la vista "${vista.nombre}"?`)) return; vistas[idx] = vista; }
+  else vistas.unshift(vista);
+  _saveVistas(vistas);
+  fdRenderVistas();
+  toast(`✓ Vista "${vista.nombre}" guardada`);
+}
+function fdCargarVista(idx) {
+  const vistas = _loadVistas();
+  const v = vistas[idx]; if (!v) return;
+  // Restore filter state
+  fpFiltros.estados   = new Set(v.filtros.estados   || []);
+  fpFiltros.catalogos = new Set(v.filtros.catalogos || []);
+  fpFiltros.nombres   = new Set(v.filtros.nombres   || []);
+  fpFiltros.lotes     = new Set(v.filtros.lotes     || []);
+  fpFiltros.temps     = new Set(v.filtros.temps     || []);
+  fpFiltros.fechaDesde = v.filtros.fechaDesde || '';
+  fpFiltros.fechaHasta = v.filtros.fechaHasta || '';
+  fpFiltros.vencDesde  = v.filtros.vencDesde  || '';
+  fpFiltros.vencHasta  = v.filtros.vencHasta  || '';
+  // Restore UI checkboxes
+  document.querySelectorAll('.fd-estado-list input').forEach(cb => {
+    cb.checked = fpFiltros.estados.has(cb.value);
+  });
+  // Restore date inputs
+  ['fd-fecha-desde','fd-fecha-hasta','fd-venc-desde','fd-venc-hasta'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const map = {'fd-fecha-desde':'fechaDesde','fd-fecha-hasta':'fechaHasta','fd-venc-desde':'vencDesde','fd-venc-hasta':'vencHasta'};
+    el.value = fpFiltros[map[id]] || '';
+  });
+  // Restore year/query/filter
+  if (v.year)  { consultaYear = v.year; }
+  if (v.filter){ consultaFilter = v.filter; document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === v.filter)); }
+  if (v.query !== undefined) {
+    consultaQuery = v.query;
+    const inp = document.getElementById('consulta-input'); if (inp) inp.value = v.query;
+  }
+  // Re-render chips
+  ['catalogo','nombre','lote'].forEach(f => {
+    fdRenderChips(f);
+    const inp = document.getElementById(`fd-search-${f}`); if (inp) inp.value = '';
+  });
+  consultaPage = 0;
+  fpUpdateBadge();
+  fpRenderPills();
+  renderYearTabs('consulta-year-tabs', consultaYear, 'setConsultaYear');
+  renderConsulta();
+  toast(`✓ Vista "${v.nombre}" aplicada`);
+}
+function fdEliminarVista(idx) {
+  const vistas = _loadVistas();
+  const v = vistas[idx]; if (!v) return;
+  if (!confirm(`¿Eliminar la vista "${v.nombre}"?`)) return;
+  vistas.splice(idx, 1);
+  _saveVistas(vistas);
+  fdRenderVistas();
+  toast(`Vista "${v.nombre}" eliminada`);
+}
+function fdRenderVistas() {
+  const container = document.getElementById('fd-vistas-list'); if (!container) return;
+  const vistas = _loadVistas();
+  if (!vistas.length) {
+    container.innerHTML = '<span style="font-size:11px;color:var(--dim);font-style:italic">Sin vistas guardadas</span>';
+    return;
+  }
+  container.innerHTML = vistas.map((v, i) => `
+    <div style="display:flex;align-items:center;gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--surface2)">
+      <button onclick="fdCargarVista(${i})" title="${htmlEsc(v.fecha)}" style="padding:4px 10px;background:none;border:none;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px">${htmlEsc(v.nombre)}</button>
+      <button onclick="fdEliminarVista(${i})" style="padding:4px 7px;background:none;border:none;border-left:1px solid var(--border);color:var(--dim);cursor:pointer;font-size:13px;line-height:1" title="Eliminar">×</button>
+    </div>`).join('');
+}
+
+// ── BASE DE DATOS DE INSUMOS
 // ═══════════════════════════════════════════════════════════════
 const BD_SHEET = 'INSUMOS_BD';
 // BD_SHEET columns: A=codigo_raw, B=nombre, C=catalogo, D=lote, E=vencimiento
@@ -3746,9 +3853,19 @@ document.addEventListener('click', e => {
     </div>
 
   </div>
-  <div class="filter-drawer-footer">
-    <button class="btn btn-danger-ghost" onclick="limpiarFiltroPersonalizado()">Limpiar todo</button>
-    <button class="btn btn-primary" onclick="toggleFiltroDrawer()">Ver resultados</button>
+  <div class="filter-drawer-footer" style="flex-direction:column;gap:10px">
+    <!-- Vistas guardadas -->
+    <div id="fd-vistas-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:10px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:.8px">Vistas guardadas</span>
+        <button onclick="fdGuardarVista()" style="font-size:11px;padding:3px 9px;border-radius:5px;border:1px solid var(--accent);background:none;color:var(--accent);cursor:pointer;font-weight:600">+ Guardar actual</button>
+      </div>
+      <div id="fd-vistas-list" style="display:flex;flex-wrap:wrap;gap:5px;min-height:22px"></div>
+    </div>
+    <div style="display:flex;gap:8px;width:100%">
+      <button class="btn btn-danger-ghost" style="flex:1;justify-content:center" onclick="limpiarFiltroPersonalizado()">Limpiar todo</button>
+      <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="toggleFiltroDrawer()">Ver resultados</button>
+    </div>
   </div>
 </div>
 
