@@ -531,7 +531,8 @@ mark{background:transparent;color:var(--accent);font-weight:700}
   </div>
   <div class="card">
     <div class="card-title">Datos del insumo</div>
-    <div class="form-grid cols3">
+    <div class="form-grid cols2">
+      <!-- Fila 1: Nombre (ancho completo) -->
       <div class="field" style="grid-column:1/-1">
         <label>Nombre del insumo</label>
         <div class="field-wrap">
@@ -540,7 +541,8 @@ mark{background:transparent;color:var(--accent);font-weight:700}
         </div>
         <span class="autofill-tag" id="tag-nombre">✦ Autocompletado desde stock</span>
       </div>
-      <div class="field" style="grid-column:span 2">
+      <!-- Fila 2: Catálogo | Lote -->
+      <div class="field">
         <label>N° Catálogo</label>
         <div class="field-wrap">
           <input type="text" id="alta-catalogo" placeholder="Ej: A42006" oninput="altaAC('catalogo')" autocomplete="off">
@@ -549,10 +551,6 @@ mark{background:transparent;color:var(--accent);font-weight:700}
         <span class="autofill-tag" id="tag-catalogo">✦ Autocompletado desde stock</span>
       </div>
       <div class="field">
-        <label>Cantidad de unidades</label>
-        <input type="number" id="alta-cantidad" min="1" value="1" oninput="updatePreview()">
-      </div>
-      <div class="field" style="grid-column:span 2">
         <label>N° Lote (base)</label>
         <div class="field-wrap">
           <input type="text" id="alta-lote" placeholder="Ej: 2409037" oninput="altaAC('lote')" autocomplete="off">
@@ -561,20 +559,27 @@ mark{background:transparent;color:var(--accent);font-weight:700}
         <span class="hint">Se agregará A, B, C… (o AA, AB… si hay más de 27)</span>
         <span class="autofill-tag" id="tag-lote">✦ Autocompletado desde stock</span>
       </div>
+      <!-- Fila 3: Cantidad | Fecha llegada -->
+      <div class="field">
+        <label>Cantidad de unidades</label>
+        <input type="number" id="alta-cantidad" min="1" value="1" oninput="updatePreview()">
+      </div>
       <div class="field">
         <label>Fecha de llegada</label>
         <input type="date" id="alta-fecha" oninput="updatePreview()">
       </div>
-      <div class="field" style="grid-column:span 2">
+      <!-- Fila 4: Fecha vencimiento | Temperatura -->
+      <div class="field">
         <label>Fecha de vencimiento</label>
         <input type="date" id="alta-vencimiento" oninput="updatePreview(); document.getElementById('chk-sin-venc').checked=false;">
-        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mid);margin-top:6px;cursor:pointer;font-weight:400">
-          <input type="checkbox" id="chk-sin-venc" onchange="toggleSinVenc(this)" style="accent-color:var(--accent)">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--mid);margin-top:6px;cursor:pointer;font-weight:400;white-space:nowrap;width:fit-content">
+          <input type="checkbox" id="chk-sin-venc" onchange="toggleSinVenc(this)" style="accent-color:var(--accent);flex-shrink:0">
           No posee fecha de vencimiento
         </label>
       </div>
       <div class="field">
         <label>Temperatura de almacenamiento</label>
+        <div class="temp-row">
           <select id="alta-temp" onchange="onAltaTempChange()">
             <option value="15°C a 30°C">15°C a 30°C</option>
             <option value="2°C a 8°C">2°C a 8°C</option>
@@ -836,12 +841,14 @@ mark{background:transparent;color:var(--accent);font-weight:700}
   <!-- Formulario -->
   <div class="card">
     <div class="card-title">Datos del insumo</div>
-    <div class="form-grid cols3">
+    <div class="form-grid cols2">
+      <!-- Fila 1: Código raw (ancho completo, readonly) -->
       <div class="field" style="grid-column:1/-1">
         <label>Código escaneado (raw)</label>
         <input type="text" id="bd-codigo-raw" placeholder="Se completa automáticamente al escanear" readonly
           style="background:var(--surface2);color:var(--dim);font-family:'IBM Plex Mono',monospace;font-size:12px">
       </div>
+      <!-- Fila 2: Nombre (ancho completo) -->
       <div class="field" style="grid-column:1/-1">
         <label>Nombre del insumo</label>
         <div class="field-wrap">
@@ -849,14 +856,15 @@ mark{background:transparent;color:var(--accent);font-weight:700}
           <div class="alta-ac-list" id="bd-ac-nombre"></div>
         </div>
       </div>
-      <div class="field" style="grid-column:span 2">
+      <!-- Fila 3: Catálogo | Lote -->
+      <div class="field">
         <label>N° Catálogo</label>
         <div class="field-wrap">
           <input type="text" id="bd-catalogo" placeholder="Ej: 19088" oninput="bdAC('catalogo')" autocomplete="off">
           <div class="alta-ac-list" id="bd-ac-catalogo"></div>
         </div>
       </div>
-      <div class="field" style="grid-column:span 2">
+      <div class="field">
         <label>N° Lote (ejemplo de este código)</label>
         <div class="field-wrap">
           <input type="text" id="bd-lote" placeholder="Ej: A0123456" oninput="bdAC('lote')" autocomplete="off">
@@ -864,9 +872,14 @@ mark{background:transparent;color:var(--accent);font-weight:700}
         </div>
         <span class="hint">Usaremos este lote para aprender dónde está ubicado en el código.</span>
       </div>
+      <!-- Fila 4: Fecha vencimiento (media columna) -->
       <div class="field">
         <label>Fecha de vencimiento (ejemplo de este código)</label>
         <input type="date" id="bd-vencimiento">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--mid);margin-top:6px;cursor:pointer;font-weight:400;white-space:nowrap;width:fit-content">
+          <input type="checkbox" id="bd-chk-sin-venc" onchange="toggleBDSinVenc(this)" style="accent-color:var(--accent);flex-shrink:0">
+          No posee fecha de vencimiento
+        </label>
         <span class="hint">Usaremos esta fecha para extraer el vencimiento de futuros escaneos del mismo producto.</span>
       </div>
     </div>
@@ -3156,7 +3169,9 @@ function processBDBarcodeCode(raw) {
     document.getElementById('bd-nombre').value      = existing.nombre;
     document.getElementById('bd-catalogo').value    = existing.catalogo;
     document.getElementById('bd-lote').value        = existing.lote;
-    document.getElementById('bd-vencimiento').value = existing.vencimiento || '';
+    const bdChkEx = document.getElementById('bd-chk-sin-venc');
+    if (bdChkEx) { bdChkEx.checked = existing.vencimiento?.toUpperCase() === 'NA'; toggleBDSinVenc(bdChkEx); }
+    document.getElementById('bd-vencimiento').value = (existing.vencimiento?.toUpperCase() === 'NA') ? '' : (existing.vencimiento || '');
     // Show a persistent warning toast
     toast(`⚠️ Este código ya está en la BD: ${existing.nombre}`, 'error');
     return;
@@ -3184,7 +3199,8 @@ async function guardarEnBD() {
   const nombre     = document.getElementById('bd-nombre').value.trim();
   const catalogo   = document.getElementById('bd-catalogo').value.trim();
   const lote       = document.getElementById('bd-lote').value.trim();
-  const vencimiento= document.getElementById('bd-vencimiento').value.trim();
+  const sinVenc    = document.getElementById('bd-chk-sin-venc')?.checked;
+  const vencimiento= sinVenc ? 'NA' : document.getElementById('bd-vencimiento').value.trim();
 
   if (!raw)    { toast('Escaneá un código primero', 'error'); return; }
   if (!nombre) { toast('Completá el nombre del insumo', 'error'); return; }
@@ -3388,12 +3404,20 @@ async function prepoblarBD() {
   }
 }
 
+function toggleBDSinVenc(chk) {
+  const venc = document.getElementById('bd-vencimiento');
+  if (chk.checked) { venc.value = ''; venc.disabled = true; venc.style.opacity = '.4'; }
+  else             { venc.disabled = false; venc.style.opacity = ''; }
+}
+
 // ── Clear BD form ─────────────────────────────────────────────
 function limpiarBD() {
   ['bd-barcode-input','bd-codigo-raw','bd-nombre','bd-catalogo','bd-lote'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   document.getElementById('bd-vencimiento').value = '';
+  const bdChk = document.getElementById('bd-chk-sin-venc');
+  if (bdChk) { bdChk.checked = false; toggleBDSinVenc(bdChk); }
   const s = document.getElementById('bd-barcode-status');
   if (s) { s.className = 'barcode-status idle'; s.textContent = 'Listo — escaneá un código para comenzar'; }
 }
