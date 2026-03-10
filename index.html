@@ -532,7 +532,7 @@ mark{background:transparent;color:var(--accent);font-weight:700}
   <div class="card">
     <div class="card-title">Datos del insumo</div>
     <div class="form-grid cols2">
-      <div class="field">
+      <div class="field" style="grid-column:1/-1">
         <label>Nombre del insumo</label>
         <div class="field-wrap">
           <input type="text" id="alta-nombre" placeholder="Ej: 2X Oncomine Focus DNA Assay" oninput="altaAC('nombre')" autocomplete="off">
@@ -800,10 +800,16 @@ mark{background:transparent;color:var(--accent);font-weight:700}
       <div class="page-title">Base de datos de insumos</div>
       <div class="page-desc">Escaneá un código y completá los datos para que el programa lo reconozca automáticamente.</div>
     </div>
-    <button class="btn btn-ghost" onclick="syncBD()" id="bd-sync-btn" style="font-size:12px">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
-      Recargar BD
-    </button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-ghost" onclick="prepoblarBD()" id="bd-prepoblar-btn" style="font-size:12px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Pre-poblar desde stock
+      </button>
+      <button class="btn btn-ghost" onclick="syncBD()" id="bd-sync-btn" style="font-size:12px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        Recargar BD
+      </button>
+    </div>
   </div>
 
   <!-- Scanner -->
@@ -3246,12 +3252,12 @@ function renderBDTable() {
   }
 
   tbody.innerHTML = bdRecords.map(r => `
-    <tr>
+    <tr style="${!r.codigoRaw ? 'opacity:0.6' : ''}">
       <td>${htmlEsc(r.nombre)}</td>
       <td>${htmlEsc(r.catalogo)}</td>
       <td>${htmlEsc(r.lote)}</td>
       <td>${r.vencimiento ? fmtFecha(r.vencimiento) : '<span style="color:var(--dim)">—</span>'}</td>
-      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim)" title="${htmlEsc(r.codigoRaw)}">${htmlEsc(r.codigoRaw.length>40?r.codigoRaw.slice(0,40)+'…':r.codigoRaw)}</td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'IBM Plex Mono',monospace;font-size:11px;${r.codigoRaw ? 'color:var(--dim)' : 'color:var(--warn,#e6a817);font-style:italic'}" title="${htmlEsc(r.codigoRaw)}">${r.codigoRaw ? htmlEsc(r.codigoRaw.length>40?r.codigoRaw.slice(0,40)+'…':r.codigoRaw) : 'Sin escanear'}</td>
       <td><button class="btn btn-ghost" style="padding:3px 8px;font-size:11px;color:var(--red)" onclick="eliminarDeBD(${r.rowIndex},'${r.nombre.replace(/'/g,"\\'")}')">Eliminar</button></td>
     </tr>
   `).join('');
@@ -3335,6 +3341,53 @@ document.addEventListener('click', e => {
       document.getElementById(`bd-ac-${f}`)?.classList.remove('show');
   });
 });
+
+// ── Pre-poblar BD desde stock ──────────────────────────────────
+async function prepoblarBD() {
+  const btn = document.getElementById('bd-prepoblar-btn');
+  btn.disabled = true;
+  btn.textContent = 'Procesando…';
+
+  try {
+    // Asegurar que BD esté cargada
+    if (!bdRecords.length) await syncBD();
+
+    // Catálogos ya en BD (con o sin código raw)
+    const enBD = new Set(bdRecords.map(r => stripAI(r.catalogo).toLowerCase()));
+
+    // Un registro por catálogo único desde stock (excluir 2022)
+    const seen = new Set();
+    const nuevos = [];
+    for (const item of stock) {
+      if (item.sheetName === '2022') continue;
+      const cat = stripAI(item.catalogo).trim();
+      if (!cat || seen.has(cat.toLowerCase()) || enBD.has(cat.toLowerCase())) continue;
+      seen.add(cat.toLowerCase());
+      nuevos.push(['', item.nombre, "'" + cat, '', '']);  // código raw vacío, apóstrofe en catálogo
+    }
+
+    if (!nuevos.length) {
+      toast('Todos los catálogos del stock ya están en la BD', 'info');
+      return;
+    }
+
+    await gapi.client.sheets.spreadsheets.values.append({
+      spreadsheetId: SHEET_ID,
+      range: `${BD_SHEET}!A:E`,
+      valueInputOption: 'USER_ENTERED',
+      insertDataOption: 'INSERT_ROWS',
+      resource: { values: nuevos }
+    });
+
+    toast(`✓ ${nuevos.length} catálogo${nuevos.length !== 1 ? 's' : ''} agregado${nuevos.length !== 1 ? 's' : ''} a la BD`, 'success');
+    await syncBD();
+  } catch(e) {
+    toast('Error al pre-poblar: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Pre-poblar desde stock';
+  }
+}
 
 // ── Clear BD form ─────────────────────────────────────────────
 function limpiarBD() {
