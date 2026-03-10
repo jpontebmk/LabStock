@@ -1991,21 +1991,25 @@ function renderConsulta() {
   if (fpFiltros.lotes.size)     items = items.filter(i => fpFiltros.lotes.has(i.lote));
   if (fpFiltros.temps.size)     items = items.filter(i => fpFiltros.temps.has(i.tempAlmacen));
   if (fpFiltros.fechaDesde || fpFiltros.fechaHasta) {
+    const desde = fpFiltros.fechaDesde ? new Date(fpFiltros.fechaDesde) : null;
+    const hasta = fpFiltros.fechaHasta ? new Date(fpFiltros.fechaHasta + 'T23:59:59') : null;
     items = items.filter(i => {
       const d = parseFecha(i.fecha);
-      if (!d || isNaN(d)) return true;
-      if (fpFiltros.fechaDesde && d < new Date(fpFiltros.fechaDesde)) return false;
-      if (fpFiltros.fechaHasta && d > new Date(fpFiltros.fechaHasta)) return false;
+      if (!d || isNaN(d) || d.getTime() === 0) return false; // fecha inválida → excluir
+      if (desde && d < desde) return false;
+      if (hasta && d > hasta) return false;
       return true;
     });
   }
   if (fpFiltros.vencDesde || fpFiltros.vencHasta) {
+    const desde = fpFiltros.vencDesde ? new Date(fpFiltros.vencDesde) : null;
+    const hasta = fpFiltros.vencHasta ? new Date(fpFiltros.vencHasta + 'T23:59:59') : null;
     items = items.filter(i => {
-      if (!i.vencimiento || i.vencimiento.toUpperCase()==='NA') return false;
+      if (!i.vencimiento || i.vencimiento.toUpperCase() === 'NA') return false;
       const d = parseFecha(i.vencimiento);
-      if (!d || isNaN(d)) return false;
-      if (fpFiltros.vencDesde && d < new Date(fpFiltros.vencDesde)) return false;
-      if (fpFiltros.vencHasta && d > new Date(fpFiltros.vencHasta)) return false;
+      if (!d || isNaN(d) || d.getTime() === 0) return false;
+      if (desde && d < desde) return false;
+      if (hasta && d > hasta) return false;
       return true;
     });
   }
