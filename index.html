@@ -2951,13 +2951,47 @@ function switchModalTab(tab) {
 // FEATURE 3 — EXPORTAR CSV y XLSX (vista filtrada de Consultas)
 // ═══════════════════════════════════════════════════════════════
 function getConsultaItems() {
-  // Reproduce the same filter logic as renderConsulta so export = what you see
+  // Exact same filter logic as renderConsulta — export = what you see
   let items = consultaYear === 'todos' ? stock : stock.filter(i => getAnio(i) === consultaYear);
   if (consultaQuery) items = items.filter(i =>
-    i.nombre.toLowerCase().includes(consultaQuery) ||
-    i.catalogo.toLowerCase().includes(consultaQuery) ||
-    i.lote.toLowerCase().includes(consultaQuery));
+    i._nombre.includes(consultaQuery) ||
+    i._cat.includes(consultaQuery) ||
+    i._lot.includes(consultaQuery));
   if (consultaFilter !== 'todos') items = items.filter(i => getEstado(i) === consultaFilter);
+
+  // Filtros personalizados
+  if (fpFiltros.estados.size)   items = items.filter(i => fpFiltros.estados.has(getEstado(i)));
+  if (fpFiltros.catalogos.size || fpFiltros.nombres.size) {
+    items = items.filter(i =>
+      (fpFiltros.catalogos.size && fpFiltros.catalogos.has(i.catalogo)) ||
+      (fpFiltros.nombres.size   && fpFiltros.nombres.has(i.nombre))
+    );
+  }
+  if (fpFiltros.lotes.size)     items = items.filter(i => fpFiltros.lotes.has(i.lote));
+  if (fpFiltros.temps.size)     items = items.filter(i => fpFiltros.temps.has(i.tempAlmacen));
+  if (fpFiltros.fechaDesde || fpFiltros.fechaHasta) {
+    const desde = fpFiltros.fechaDesde ? new Date(fpFiltros.fechaDesde).getTime() : null;
+    const hasta = fpFiltros.fechaHasta ? new Date(fpFiltros.fechaHasta + 'T23:59:59').getTime() : null;
+    items = items.filter(i => {
+      const ts = i._fechaTs;
+      if (!ts) return false;
+      if (desde && ts < desde) return false;
+      if (hasta && ts > hasta) return false;
+      return true;
+    });
+  }
+  if (fpFiltros.vencDesde || fpFiltros.vencHasta) {
+    const desde = fpFiltros.vencDesde ? new Date(fpFiltros.vencDesde).getTime() : null;
+    const hasta = fpFiltros.vencHasta ? new Date(fpFiltros.vencHasta + 'T23:59:59').getTime() : null;
+    items = items.filter(i => {
+      if (!i.vencimiento || i.vencimiento.toUpperCase() === 'NA') return false;
+      const ts = i._vencTs;
+      if (!ts) return false;
+      if (desde && ts < desde) return false;
+      if (hasta && ts > hasta) return false;
+      return true;
+    });
+  }
   return items;
 }
 
