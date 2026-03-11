@@ -1041,6 +1041,66 @@ mark{background:transparent;color:var(--accent);font-weight:700}
   </div>
 </div>
 
+<!-- MÉTRICAS -->
+<div class="page" id="page-metricas">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-title">Métricas</div>
+      <div class="page-desc">Análisis de consumo y proyecciones por insumo</div>
+    </div>
+  </div>
+  <div class="metricas-search-section">
+    <div class="metricas-search-wrap">
+      <div class="metricas-search-row">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:12px;flex-shrink:0;color:var(--mid)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="metricaSearch" type="text" placeholder="Buscar por nombre, catálogo o lote…" autocomplete="off"
+          oninput="metricaOnInput()" onkeydown="metricaOnKey(event)" onfocus="metricaShowDrop()">
+        <button class="metricas-clear" id="metricaClear" onclick="metricaClearInput()" style="display:none">×</button>
+      </div>
+      <div class="metricas-ac-drop" id="metricaAcDrop"></div>
+    </div>
+    <div id="metricaActiveChip" style="display:none" class="metricas-active-chip">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent);flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      <div><strong id="metricaChipName"></strong> <span class="metricas-chip-cat" id="metricaChipCat"></span></div>
+      <span class="metricas-chip-x" onclick="metricaClearSelection()">×</span>
+    </div>
+    <div id="metricaNoSel" class="metricas-no-sel">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Mostrando alertas y proyecciones globales
+    </div>
+    <!-- Botón filtro -->
+    <button class="metricas-filter-btn" id="metricaFiltroBtn" onclick="metricaToggleFiltro()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      Filtrar
+      <span class="metricas-filter-badge" id="metricaFiltroBadge" style="display:none">!</span>
+    </button>
+  </div>
+  <!-- Panel de filtro -->
+  <div class="metricas-filtro-panel" id="metricaFiltroPanel" style="display:none">
+    <div class="metricas-filtro-inner">
+      <div class="metricas-filtro-group">
+        <div class="metricas-filtro-label">Año</div>
+        <div class="metricas-filtro-pills" id="metricaYearPills">
+          <div class="metricas-pill active" data-val="todos" onclick="metricaSetYear(this)">Todos</div>
+          <div class="metricas-pill" data-val="2023" onclick="metricaSetYear(this)">2023</div>
+          <div class="metricas-pill" data-val="2024" onclick="metricaSetYear(this)">2024</div>
+          <div class="metricas-pill" data-val="2025" onclick="metricaSetYear(this)">2025</div>
+          <div class="metricas-pill" data-val="2026" onclick="metricaSetYear(this)">2026</div>
+        </div>
+      </div>
+      <div class="metricas-filtro-group">
+        <div class="metricas-filtro-label">Rango de fecha de uso</div>
+        <div class="metricas-filtro-dates">
+          <div><label>Desde</label><input type="date" id="metricaDesde" onchange="metricaApplyFilter()"></div>
+          <div><label>Hasta</label><input type="date" id="metricaHasta" onchange="metricaApplyFilter()"></div>
+        </div>
+      </div>
+      <button class="metricas-filtro-clear" onclick="metricaLimpiarFiltro()">Limpiar filtros</button>
+    </div>
+  </div>
+  <div id="metricaMain" style="display:flex;flex-direction:column;gap:16px;margin-top:16px"></div>
+</div>
+
 </main>
 </div>
 </div>
@@ -4587,66 +4647,6 @@ document.addEventListener('click', e => {
       <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="toggleFiltroDrawer()">Ver resultados</button>
     </div>
   </div>
-</div>
-
-<!-- MÉTRICAS -->
-<div class="page" id="page-metricas">
-  <div class="page-header">
-    <div class="page-header-left">
-      <div class="page-title">Métricas</div>
-      <div class="page-desc">Análisis de consumo y proyecciones por insumo</div>
-    </div>
-  </div>
-  <div class="metricas-search-section">
-    <div class="metricas-search-wrap">
-      <div class="metricas-search-row">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:12px;flex-shrink:0;color:var(--mid)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input id="metricaSearch" type="text" placeholder="Buscar por nombre, catálogo o lote…" autocomplete="off"
-          oninput="metricaOnInput()" onkeydown="metricaOnKey(event)" onfocus="metricaShowDrop()">
-        <button class="metricas-clear" id="metricaClear" onclick="metricaClearInput()" style="display:none">×</button>
-      </div>
-      <div class="metricas-ac-drop" id="metricaAcDrop"></div>
-    </div>
-    <div id="metricaActiveChip" style="display:none" class="metricas-active-chip">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent);flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-      <div><strong id="metricaChipName"></strong> <span class="metricas-chip-cat" id="metricaChipCat"></span></div>
-      <span class="metricas-chip-x" onclick="metricaClearSelection()">×</span>
-    </div>
-    <div id="metricaNoSel" class="metricas-no-sel">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      Mostrando alertas y proyecciones globales
-    </div>
-    <!-- Botón filtro -->
-    <button class="metricas-filter-btn" id="metricaFiltroBtn" onclick="metricaToggleFiltro()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-      Filtrar
-      <span class="metricas-filter-badge" id="metricaFiltroBadge" style="display:none">!</span>
-    </button>
-  </div>
-  <!-- Panel de filtro -->
-  <div class="metricas-filtro-panel" id="metricaFiltroPanel" style="display:none">
-    <div class="metricas-filtro-inner">
-      <div class="metricas-filtro-group">
-        <div class="metricas-filtro-label">Año</div>
-        <div class="metricas-filtro-pills" id="metricaYearPills">
-          <div class="metricas-pill active" data-val="todos" onclick="metricaSetYear(this)">Todos</div>
-          <div class="metricas-pill" data-val="2023" onclick="metricaSetYear(this)">2023</div>
-          <div class="metricas-pill" data-val="2024" onclick="metricaSetYear(this)">2024</div>
-          <div class="metricas-pill" data-val="2025" onclick="metricaSetYear(this)">2025</div>
-          <div class="metricas-pill" data-val="2026" onclick="metricaSetYear(this)">2026</div>
-        </div>
-      </div>
-      <div class="metricas-filtro-group">
-        <div class="metricas-filtro-label">Rango de fecha de uso</div>
-        <div class="metricas-filtro-dates">
-          <div><label>Desde</label><input type="date" id="metricaDesde" onchange="metricaApplyFilter()"></div>
-          <div><label>Hasta</label><input type="date" id="metricaHasta" onchange="metricaApplyFilter()"></div>
-        </div>
-      </div>
-      <button class="metricas-filtro-clear" onclick="metricaLimpiarFiltro()">Limpiar filtros</button>
-    </div>
-  </div>
-  <div id="metricaMain" style="display:flex;flex-direction:column;gap:16px;margin-top:16px"></div>
 </div>
 
 <!-- Google APIs -->
