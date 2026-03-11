@@ -900,9 +900,10 @@ mark{background:transparent;color:var(--accent);font-weight:700}
       <div class="field">
         <label>N° Catálogo</label>
         <div class="field-wrap">
-          <input type="text" id="bd-catalogo" placeholder="Ej: 19088" oninput="bdAC('catalogo')" autocomplete="off">
+          <input type="text" id="bd-catalogo" placeholder="Ej: 19088" oninput="bdAC('catalogo');bdCheckCatalogoEnBD(this.value)" autocomplete="off">
           <div class="alta-ac-list" id="bd-ac-catalogo"></div>
         </div>
+        <div id="bd-cat-dup-warn" style="display:none;margin-top:5px;font-size:12px;font-weight:500;color:var(--red);background:var(--red-l);border:1px solid var(--red);border-radius:6px;padding:6px 10px;line-height:1.4"></div>
       </div>
       <div class="field">
         <label>N° Lote (ejemplo de este código)</label>
@@ -3912,6 +3913,8 @@ function bdACSelect(field, idx) {
     const bestCat = Object.entries(freq).sort((a,b)=>b[1]-a[1])[0]?.[0];
     if (bestCat) setVal('bd-catalogo', stripAI(bestCat));
   }
+  // Check for duplicate right after autocomplete fills the catalogue field
+  setTimeout(() => bdCheckCatalogoEnBD(document.getElementById('bd-catalogo')?.value), 50);
 }
 
 // Close BD autocomplete
@@ -3923,6 +3926,25 @@ document.addEventListener('click', e => {
       document.getElementById(`bd-ac-${f}`)?.classList.remove('show');
   });
 });
+
+// ── Inline duplicate check while typing/autocompleting catalogue ──────────────
+function bdCheckCatalogoEnBD(rawCat) {
+  const warn = document.getElementById('bd-cat-dup-warn');
+  if (!warn) return;
+  const cat = (rawCat || '').trim();
+  if (!cat || cat.length < 3) { warn.style.display = 'none'; return; }
+
+  const dup = bdRecords.find(r => r.codigoRaw &&
+    stripAI(r.catalogo).toLowerCase() === stripAI(cat).toLowerCase());
+
+  if (dup) {
+    warn.style.display = 'block';
+    warn.innerHTML = `⚠️ <strong>${htmlEsc(dup.nombre)}</strong> ya está en la BD con código RAW registrado.` +
+      ` Si es el mismo producto, escaneá su código y se actualizará automáticamente.`;
+  } else {
+    warn.style.display = 'none';
+  }
+}
 
 // ── Pre-poblar BD desde stock ──────────────────────────────────
 async function prepoblarBD() {
@@ -3987,6 +4009,8 @@ function limpiarBD() {
   if (bdChk) { bdChk.checked = false; toggleBDSinVenc(bdChk); }
   const s = document.getElementById('bd-barcode-status');
   if (s) { s.className = 'barcode-status idle'; s.textContent = 'Listo — escaneá un código para comenzar'; }
+  const w = document.getElementById('bd-cat-dup-warn');
+  if (w) w.style.display = 'none';
 }
 
 // ── Hook BD lookup into processBarcodeCode ────────────────────
