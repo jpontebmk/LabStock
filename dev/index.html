@@ -1803,6 +1803,9 @@ function irAConsultasConSet(cats, label) {
   consultaFilter = 'todos';
   const input = document.getElementById('consulta-input');
   if (input) input.value = '';
+  console.log('[dashFiltro] cats:', cats, '→ Set:', [..._dashFiltroSet]);
+  // Muestra de stock para comparar
+  if (stock && stock.length) console.log('[dashFiltro] stock sample catalogo:', stock.slice(0,3).map(i => stripAI(i.catalogo||'').toUpperCase()));
   showPage('consultas');
 }
 
