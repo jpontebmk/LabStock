@@ -2753,7 +2753,47 @@ function processBarcodeCode(code, context = 'alta') {
   if (inputEl) { inputEl.classList.add('flash'); setTimeout(()=>inputEl.classList.remove('flash'), 400); }
 
   // ── 0. Try BD lookup first (highest priority) ─────────────
-  if (context !== 'bd' && bdRecords.length && lookupBDAndFill(rawCode, context)) return;
+  if (context !== 'bd' && bdRecords.length) {
+    // First try raw code structural match
+    if (lookupBDAndFill(rawCode, context)) return;
+
+    // If that fails, try GS1 parse to extract catalogue and look up in BD by catalogue
+    if (rawCode.length > 10) {
+      const preGS1 = parseGS1(rawCode);
+      const preCat = extractCatalog(preGS1);
+      const preLote = (preGS1.lot || '').trim().toUpperCase();
+      const preVenc = gs1ExpToISO(preGS1.expDate || preGS1.bestBefore || '');
+      if (preCat) {
+        const bdMatch = bdRecords.find(r => r.codigoRaw && stripAI(r.catalogo).toLowerCase() === preCat.toLowerCase());
+        if (bdMatch) {
+          // Found by catalogue — fill fields using BD record + GS1-extracted lote/venc
+          if (context === 'alta') {
+            const nombreEl = document.getElementById('alta-nombre');
+            const catEl    = document.getElementById('alta-catalogo');
+            const loteEl   = document.getElementById('alta-lote');
+            const vencEl   = document.getElementById('alta-vencimiento');
+            if (nombreEl && !nombreEl.value.trim()) { nombreEl.value = bdMatch.nombre;   flashFill('alta-nombre'); }
+            if (catEl    && !catEl.value.trim())    { catEl.value    = bdMatch.catalogo; flashFill('alta-catalogo'); }
+            if (loteEl   && !loteEl.value.trim() && preLote) { loteEl.value = preLote; flashFill('alta-lote'); }
+            if (vencEl   && !vencEl.value && preVenc) { vencEl.value = preVenc; flashFill('alta-vencimiento'); document.getElementById('chk-sin-venc').checked = false; }
+            inferAndSetTemp(bdMatch.catalogo, bdMatch.temp);
+            const statusEl = document.getElementById('barcode-status');
+            if (statusEl) { statusEl.className = 'barcode-status found'; statusEl.textContent = `✓ BD (GS1): ${bdMatch.nombre} · Cat: ${bdMatch.catalogo}${preLote?' · Lote: '+preLote:''}${preVenc?' · Vence: '+preVenc:''}`; }
+            toast('✓ Autocompletado desde BD (catálogo GS1)', 'success');
+            updatePreview();
+          } else if (context === 'baja') {
+            const q = preLote || bdMatch.catalogo || bdMatch.nombre;
+            const searchEl = document.getElementById('baja-search-input');
+            if (searchEl) { searchEl.value = q; buscarBaja(); }
+            const statusEl = document.getElementById('barcode-status-baja');
+            if (statusEl) { statusEl.className = 'barcode-status found'; statusEl.textContent = `✓ BD (GS1): ${bdMatch.nombre}${preLote?' · Lote: '+preLote:''}…`; }
+            toast(`✓ BD: ${bdMatch.nombre} — resultados abajo`, 'success');
+          }
+          return;
+        }
+      }
+    }
+  }
 
   // ── 1. Try GS1 parse ──────────────────────────────────────
   let parsed = {};
