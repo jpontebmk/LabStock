@@ -2535,6 +2535,7 @@ function sortConsulta(col) {
 }
 
 function renderConsulta() {
+  console.log('[renderConsulta] _dashFiltroSet:', _dashFiltroSet ? [..._dashFiltroSet] : null);
   // Banner del dashboard
   const bannerEl = document.getElementById('consulta-dash-banner');
   const bannerLabel = document.getElementById('consulta-dash-banner-label');
