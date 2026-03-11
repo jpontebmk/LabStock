@@ -52,7 +52,7 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 #login-status{font-size:12px;color:var(--dim);margin-top:12px;min-height:18px}
 
 /* SHELL */
-.shell{display:flex;min-height:100vh;align-items:flex-start}
+.shell{display:flex;min-height:100vh}
 #app{display:none}
 
 /* SIDEBAR */
@@ -80,7 +80,7 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .btn-logout:hover{background:#1e1a23;color:#8a8090}
 
 /* MAIN */
-.main{flex:1;overflow-x:hidden;min-width:0}
+.main{flex:1;overflow-x:hidden}
 .page{display:none;padding:32px 36px;animation:fadeIn .2s ease}
 .page.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -251,6 +251,76 @@ mark{background:transparent;color:var(--accent);font-weight:700}
 
 /* STATS */
 .stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px}
+/* ── DASHBOARD NUEVO ── */
+.dash-stat-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.dash-stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:14px}
+.dash-stat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dash-stat-icon.red{background:#1e0f0f}.dash-stat-icon.amber{background:#1c1400}.dash-stat-icon.orange{background:#1c0e00}
+.dash-stat-num{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;line-height:1}
+.dash-stat-lbl{font-size:11px;color:var(--mid);margin-top:2px}
+.dash-stat-num.red{color:#f08080}.dash-stat-num.amber{color:#f5b93a}.dash-stat-num.orange{color:#f5943a}
+.dash-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.dash-card-head{padding:16px 20px 14px;display:flex;align-items:center;justify-content:space-between}
+.dash-card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--mid)}
+.dash-card-count{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);background:var(--surface2);padding:2px 8px;border-radius:4px}
+.dash-empty{padding:20px;text-align:center;font-size:12px;color:var(--dim)}
+/* vencimientos */
+.dash-venc-item{display:flex;align-items:center;gap:12px;padding:10px 20px;border-top:1px solid var(--border2);cursor:pointer;transition:.15s}
+.dash-venc-item:hover{background:var(--surface2)}
+.dash-venc-bar{width:3px;flex-shrink:0;align-self:stretch;border-radius:2px;min-height:32px}
+.dash-venc-bar.vencido{background:#5a1a1a}.dash-venc-bar.critico{background:var(--red)}.dash-venc-bar.proximo{background:var(--amber)}
+.dash-venc-body{flex:1;min-width:0}
+.dash-venc-nombre{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px}
+.dash-venc-meta{font-size:11px;color:var(--mid);display:flex;gap:12px}
+.dash-venc-badge{flex-shrink:0;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:3px 9px;border-radius:5px;white-space:nowrap}
+.dash-venc-badge.vencido{background:#160a0a;color:#b06060;border:1px solid #2e1010}
+.dash-venc-badge.critico{background:#1e0f0f;color:#f08080;border:1px solid #3a1212}
+.dash-venc-badge.proximo{background:#1c1400;color:#f5b93a;border:1px solid #2e1e00}
+/* bajo stock */
+.dash-ss-item{display:flex;align-items:center;gap:12px;padding:10px 20px;border-top:1px solid var(--border2);cursor:pointer;transition:.15s}
+.dash-ss-item:hover{background:var(--surface2)}
+.dash-ss-body{flex:1;min-width:0}
+.dash-ss-nombre{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px}
+.dash-ss-cat{font-size:11px;color:var(--dim);font-family:'IBM Plex Mono',monospace}
+.dash-ss-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.dash-ss-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;font-family:'IBM Plex Mono',monospace;white-space:nowrap}
+.dash-ss-badge.sinstock{background:#1e0f0f;color:#f08080;border:1px solid #3a1212}
+.dash-ss-badge.bajo{background:#1c1400;color:#f5b93a;border:1px solid #2e1e00}
+.dash-ss-ub{font-size:10px;color:var(--dim)}
+.dash-ss-divider{padding:4px 20px 6px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);background:var(--surface2);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2)}
+/* errores */
+.dash-err-item{display:flex;align-items:flex-start;gap:12px;padding:11px 20px;border-top:1px solid var(--border2);cursor:pointer;transition:.15s}
+.dash-err-item:hover{background:var(--surface2)}
+.dash-err-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px}
+.dash-err-icon.fecha{background:#160e00}.dash-err-icon.incons{background:#0e0016}.dash-err-icon.logico{background:#160a0a}
+.dash-err-body{flex:1;min-width:0}
+.dash-err-nombre{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px}
+.dash-err-desc{font-size:11px;color:var(--mid);line-height:1.5}
+.dash-err-desc code{font-family:'IBM Plex Mono',monospace;background:var(--surface3);padding:1px 5px;border-radius:3px;font-size:10px;color:var(--text)}
+.dash-err-badge{flex-shrink:0;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;font-family:'IBM Plex Mono',monospace;white-space:nowrap;margin-top:2px}
+.dash-err-badge.fecha{background:#160e00;color:#e8a840;border:1px solid #2a1e00}
+.dash-err-badge.incons{background:#0e0016;color:#c4a2f5;border:1px solid #2a1040}
+.dash-err-badge.logico{background:#1e0f0f;color:#f08080;border:1px solid #3a1212}
+/* calendario */
+.dash-cal-wrap{padding:4px 20px 20px}
+.dash-cal-month{margin-bottom:18px}
+.dash-cal-month:last-child{margin-bottom:0}
+.dash-cal-month-hdr{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid var(--border2)}
+.dash-cal-month-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;min-width:90px}
+.dash-cal-month-bar{flex:1;height:2px;background:var(--border2);border-radius:1px;overflow:hidden}
+.dash-cal-month-fill{height:100%;border-radius:1px;background:var(--accent);opacity:.35}
+.dash-cal-month-n{font-size:10px;color:var(--dim);font-family:'IBM Plex Mono',monospace}
+.dash-cal-item{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:6px;cursor:pointer;transition:.15s}
+.dash-cal-item:hover{background:var(--surface2)}
+.dash-cal-fecha{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mid);width:46px;flex-shrink:0}
+.dash-cal-nombre{font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dash-cal-lote{font-size:10px;color:var(--dim);font-family:'IBM Plex Mono',monospace;flex-shrink:0;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dash-cal-dias{font-size:11px;font-weight:600;font-family:'IBM Plex Mono',monospace;flex-shrink:0;padding:2px 7px;border-radius:4px;min-width:36px;text-align:right}
+.dash-cal-dias.d7{color:#f08080;background:#1e0f0f}.dash-cal-dias.d30{color:#f5b93a;background:#1c1400}
+.dash-cal-dias.d60{color:#6ddaa4;background:#0a1810}.dash-cal-dias.d90{color:var(--mid);background:var(--surface3)}
+.dash-range-pills{display:flex;gap:4px}
+.dash-rpill{padding:2px 9px;border-radius:4px;font-size:11px;cursor:pointer;border:1px solid var(--border);color:var(--dim);background:none;font-family:'IBM Plex Sans',sans-serif;transition:.15s}
+.dash-rpill.active{background:var(--accent-l);border-color:var(--accent);color:var(--accent-d)}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;box-shadow:var(--shadow)}
 .stat-value{font-size:28px;font-weight:600;letter-spacing:-1px;line-height:1}
 .stat-label{font-size:11px;color:var(--dim);margin-top:5px;text-transform:uppercase;letter-spacing:.5px}
@@ -392,101 +462,6 @@ mark{background:transparent;color:var(--accent);font-weight:700}
 .fd-estado-item span{font-size:13px}
 .btn-danger-ghost{background:transparent;color:var(--red);border:1px solid var(--border);font-family:'IBM Plex Sans',sans-serif}
 .btn-danger-ghost:hover{background:var(--red-l);border-color:var(--red)}
-/* ── MÉTRICAS ── */
-.metricas-search-section{display:flex;align-items:flex-start;gap:12px;position:relative;z-index:100;margin-bottom:4px}
-.metricas-search-wrap{flex:1;max-width:560px;position:relative}
-.metricas-search-row{display:flex;align-items:center;gap:0;background:var(--surface);border:1.5px solid var(--border);border-radius:9px;overflow:hidden;transition:.2s}
-.metricas-search-row:focus-within{border-color:var(--accent)}
-.metricas-search-row input{flex:1;padding:10px 12px;background:transparent;border:none;color:var(--text);font-size:14px;font-family:'IBM Plex Sans',sans-serif;outline:none}
-.metricas-clear{padding:0 12px;background:none;border:none;color:var(--mid);cursor:pointer;font-size:16px;line-height:1}
-.metricas-clear:hover{color:var(--text)}
-.metricas-ac-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4);display:none;z-index:200}
-.metricas-ac-drop.show{display:block}
-.metricas-ac-item{padding:9px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:.15s}
-.metricas-ac-item:hover,.metricas-ac-item.m-active{background:var(--accent-l)}
-.metricas-ac-main{font-size:13px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.metricas-ac-cat{font-size:11px;color:var(--dim);font-family:'IBM Plex Mono',monospace;flex-shrink:0}
-.metricas-ac-mark{color:var(--accent-d)}
-.metricas-active-chip{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--accent-l);border:1px solid var(--accent);border-radius:8px;font-size:12px;flex-shrink:0}
-.metricas-active-chip strong{color:var(--accent-d);white-space:nowrap}
-.metricas-chip-cat{font-size:11px;color:var(--mid);font-family:'IBM Plex Mono',monospace}
-.metricas-chip-x{color:var(--dim);cursor:pointer;font-size:15px;margin-left:2px}
-.metricas-chip-x:hover{color:var(--text)}
-.metricas-no-sel{display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--dim);flex-shrink:0}
-.m-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.m-kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden}
-.m-kpi::after{content:'';position:absolute;top:0;right:0;width:60px;height:60px;border-radius:50%;opacity:.08;transform:translate(20px,-20px)}
-.m-kpi.purple::after{background:var(--accent)}.m-kpi.blue::after{background:#5b8ee8}.m-kpi.amber::after{background:var(--amber)}.m-kpi.teal::after{background:#3ecfb2}
-.m-kpi-label{font-size:10px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
-.m-kpi-value{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;line-height:1;margin-bottom:4px}
-.m-kpi-sub{font-size:11px;color:var(--dim)}
-.m-kpi-trend{font-size:11px;margin-top:6px;font-weight:500}
-.m-kpi-trend.good{color:var(--green)}.m-kpi-trend.bad{color:var(--red)}.m-kpi-trend.neutral{color:var(--mid)}
-.m-kpi.purple .m-kpi-value{color:var(--accent-d)}.m-kpi.blue .m-kpi-value{color:#5b8ee8}.m-kpi.amber .m-kpi-value{color:var(--amber)}.m-kpi.teal .m-kpi-value{color:#3ecfb2}
-.m-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.m-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-.m-grid-31{display:grid;grid-template-columns:2fr 1fr;gap:16px}
-.m-grid-13{display:grid;grid-template-columns:1fr 2fr;gap:16px}
-.m-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px}
-.m-card-title{font-size:11px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
-.m-card-sub{font-size:11px;color:var(--dim)}
-.m-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
-.m-habil-note{font-size:10px;color:var(--dim);display:flex;align-items:center;gap:4px;margin-top:2px}
-.m-unit-timeline{display:flex;flex-direction:column;gap:6px}
-.m-unit-row{display:flex;align-items:center;gap:8px}
-.m-unit-lote{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mid);width:90px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.m-unit-bar-wrap{flex:1;height:20px;background:var(--surface2);border-radius:4px;overflow:hidden}
-.m-unit-bar{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:10px;font-weight:500;white-space:nowrap;overflow:hidden}
-.m-unit-bar.usado{background:rgba(78,203,113,.12);border:1px solid rgba(78,203,113,.25);color:var(--green)}
-.m-unit-bar.activo{background:rgba(157,111,224,.18);border:1px solid rgba(157,111,224,.4);color:var(--accent-d)}
-.m-unit-bar.disponible{background:var(--border);color:var(--dim)}
-.m-unit-dur{font-size:10px;color:var(--dim);width:52px;text-align:right;flex-shrink:0;font-family:'IBM Plex Mono',monospace}
-.m-interval-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border2);font-size:12px}
-.m-interval-row:last-child{border-bottom:none}
-.m-interval-num{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;min-width:42px}
-.m-interval-label{color:var(--mid);flex:1}
-.m-interval-bar{width:80px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
-.m-interval-fill{height:100%;border-radius:2px;background:var(--accent)}
-.m-alert-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border2)}
-.m-alert-item:last-child{border-bottom:none}
-.m-alert-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px}
-.m-alert-icon.red{background:var(--red-l)}.m-alert-icon.amber{background:var(--amber-l)}.m-alert-icon.blue{background:var(--blue-l)}
-.m-alert-body{flex:1;min-width:0}
-.m-alert-title{font-size:12px;font-weight:500;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.m-alert-desc{font-size:11px;color:var(--dim)}
-.m-alert-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;flex-shrink:0;font-family:'IBM Plex Mono',monospace}
-.m-alert-badge.red{background:var(--red-l);color:var(--red)}.m-alert-badge.amber{background:var(--amber-l);color:var(--amber)}.m-alert-badge.blue{background:var(--blue-l);color:#5b8ee8}
-.m-agot-item{padding:10px 0;border-bottom:1px solid var(--border2)}
-.m-agot-item:last-child{border-bottom:none}
-.m-agot-name{font-size:12px;font-weight:500;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.m-agot-bar-wrap{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-bottom:4px}
-.m-agot-bar{height:100%;border-radius:3px}
-.m-agot-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--dim)}
-.m-days-badge{font-size:11px;font-weight:600;font-family:'IBM Plex Mono',monospace;padding:2px 7px;border-radius:4px;flex-shrink:0}
-.m-days-badge.urgent{background:var(--red-l);color:var(--red)}.m-days-badge.warn{background:var(--amber-l);color:var(--amber)}.m-days-badge.ok{background:var(--green-l);color:var(--green)}
-.m-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:12px;color:var(--dim);text-align:center}
-.m-empty p{font-size:13px;line-height:1.6;max-width:320px}
-.m-sub-note{font-size:11px;color:var(--dim);margin-bottom:12px;padding:6px 10px;background:var(--surface2);border-radius:6px;border-left:2px solid var(--accent)}
-.metricas-filter-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:9px;color:var(--mid);cursor:pointer;font-size:13px;font-family:'IBM Plex Sans',sans-serif;transition:.15s;white-space:nowrap;flex-shrink:0}
-.metricas-filter-btn:hover,.metricas-filter-btn.active{border-color:var(--accent);color:var(--accent-d)}
-.metricas-filter-btn.active{background:var(--accent-l)}
-.metricas-filter-badge{background:var(--accent);color:#fff;font-size:9px;font-weight:700;width:14px;height:14px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
-.metricas-filtro-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:10px;overflow:hidden}
-.metricas-filtro-inner{padding:16px 20px;display:flex;align-items:flex-end;gap:28px;flex-wrap:wrap}
-.metricas-filtro-group{display:flex;flex-direction:column;gap:8px}
-.metricas-filtro-label{font-size:10px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:.8px}
-.metricas-filtro-pills{display:flex;gap:6px;flex-wrap:wrap}
-.metricas-pill{padding:4px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);color:var(--mid);transition:.15s;background:none}
-.metricas-pill:hover{border-color:var(--accent);color:var(--accent-d)}
-.metricas-pill.active{background:var(--accent-l);border-color:var(--accent);color:var(--accent-d);font-weight:600}
-.metricas-filtro-dates{display:flex;gap:12px}
-.metricas-filtro-dates label{font-size:11px;color:var(--dim);display:block;margin-bottom:4px}
-.metricas-filtro-dates input{padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;outline:none;font-family:'IBM Plex Sans',sans-serif}
-.metricas-filtro-dates input:focus{border-color:var(--accent)}
-.metricas-filtro-clear{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--mid);font-size:12px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif}
-.metricas-filtro-clear:hover{border-color:var(--red);color:var(--red)}
-.m-unit-more{margin-top:6px;font-size:12px;color:var(--accent-d);cursor:pointer;padding:5px 0;text-align:center;border:1px dashed var(--border);border-radius:6px}
-.m-unit-more:hover{background:var(--accent-l)}
 </style>
 </head>
 <body>
@@ -563,10 +538,6 @@ mark{background:transparent;color:var(--accent);font-weight:700}
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       Consultas
     </button>
-    <button class="nav-item" onclick="showPage('metricas')">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Métricas
-    </button>
     <div class="nav-section-label" style="margin-top:auto;padding-top:12px">Herramientas</div>
     <button class="nav-item nav-item-subtle" onclick="showPage('bd')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
@@ -614,20 +585,60 @@ mark{background:transparent;color:var(--accent);font-weight:700}
   </div>
   <div id="alert-container"></div>
   <div id="dash-year-tabs" class="year-tabs-bar"></div>
-  <div class="stats-row">
-    <div class="stat-card blue"><div class="stat-value" id="stat-total">—</div><div class="stat-label">Total insumos</div></div>
-    <div class="stat-card purple"><div class="stat-value" id="stat-disp">—</div><div class="stat-label">Disponibles</div></div>
-    <div class="stat-card red"><div class="stat-value" id="stat-baja">—</div><div class="stat-label">Dados de baja</div></div>
-    <div class="stat-card amber"><div class="stat-value" id="stat-vence">—</div><div class="stat-label">Por vencer</div></div>
-    <div class="stat-card red"><div class="stat-value" id="stat-vencido">—</div><div class="stat-label">Vencidos</div></div>
+
+  <!-- STAT STRIP -->
+  <div class="dash-stat-strip">
+    <div class="dash-stat">
+      <div class="dash-stat-icon red"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+      <div><div class="dash-stat-num red" id="stat-vencido">—</div><div class="dash-stat-lbl">Vencidos</div></div>
+    </div>
+    <div class="dash-stat">
+      <div class="dash-stat-icon amber"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div><div class="dash-stat-num amber" id="stat-vence">—</div><div class="dash-stat-lbl">Por vencer (60d)</div></div>
+    </div>
+    <div class="dash-stat">
+      <div class="dash-stat-icon orange"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f5943a" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+      <div><div class="dash-stat-num orange" id="stat-errores">—</div><div class="dash-stat-lbl">Posibles errores</div></div>
+    </div>
   </div>
-  <div class="card">
-    <div class="card-title">Últimos movimientos</div>
-    <div class="table-wrap">
-      <table class="results-table">
-        <thead><tr><th>Fecha</th><th>Hoja</th><th>Insumo</th><th>N° Catálogo</th><th>N° Lote</th><th>Estado</th></tr></thead>
-        <tbody id="dash-tbody"><tr class="loading-row"><td colspan="6"><span class="spinner"></span>Cargando desde Google Sheets…</td></tr></tbody>
-      </table>
+
+  <!-- FILA 1 -->
+  <div class="dash-grid-2">
+    <div class="card">
+      <div class="dash-card-head">
+        <div class="dash-card-title">Vencidos y por vencer</div>
+        <div class="dash-card-count" id="dash-venc-count">—</div>
+      </div>
+      <div id="dash-venc-list"></div>
+    </div>
+    <div class="card">
+      <div class="dash-card-head">
+        <div class="dash-card-title">Alertas de bajo stock</div>
+        <div class="dash-card-count" id="dash-ss-count">—</div>
+      </div>
+      <div id="dash-ss-list"></div>
+    </div>
+  </div>
+
+  <!-- FILA 2 -->
+  <div class="dash-grid-2">
+    <div class="card">
+      <div class="dash-card-head">
+        <div class="dash-card-title">Próximos vencimientos</div>
+        <div class="dash-range-pills">
+          <button class="dash-rpill" onclick="dashSetRange(30,this)">30d</button>
+          <button class="dash-rpill active" onclick="dashSetRange(60,this)">60d</button>
+          <button class="dash-rpill" onclick="dashSetRange(90,this)">90d</button>
+        </div>
+      </div>
+      <div class="dash-cal-wrap" id="dash-cal-wrap"></div>
+    </div>
+    <div class="card">
+      <div class="dash-card-head">
+        <div class="dash-card-title">Posibles errores de carga</div>
+        <div class="dash-card-count" id="dash-err-count">—</div>
+      </div>
+      <div id="dash-err-list"></div>
     </div>
   </div>
 </div>
@@ -1039,66 +1050,6 @@ mark{background:transparent;color:var(--accent);font-weight:700}
       </table>
     </div>
   </div>
-</div>
-
-<!-- MÉTRICAS -->
-<div class="page" id="page-metricas">
-  <div class="page-header">
-    <div class="page-header-left">
-      <div class="page-title">Métricas</div>
-      <div class="page-desc">Análisis de consumo y proyecciones por insumo</div>
-    </div>
-  </div>
-  <div class="metricas-search-section">
-    <div class="metricas-search-wrap">
-      <div class="metricas-search-row">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:12px;flex-shrink:0;color:var(--mid)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input id="metricaSearch" type="text" placeholder="Buscar por nombre, catálogo o lote…" autocomplete="off"
-          oninput="metricaOnInput()" onkeydown="metricaOnKey(event)" onfocus="metricaShowDrop()">
-        <button class="metricas-clear" id="metricaClear" onclick="metricaClearInput()" style="display:none">×</button>
-      </div>
-      <div class="metricas-ac-drop" id="metricaAcDrop"></div>
-    </div>
-    <div id="metricaActiveChip" style="display:none" class="metricas-active-chip">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent);flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-      <div><strong id="metricaChipName"></strong> <span class="metricas-chip-cat" id="metricaChipCat"></span></div>
-      <span class="metricas-chip-x" onclick="metricaClearSelection()">×</span>
-    </div>
-    <div id="metricaNoSel" class="metricas-no-sel">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      Mostrando alertas y proyecciones globales
-    </div>
-    <!-- Botón filtro -->
-    <button class="metricas-filter-btn" id="metricaFiltroBtn" onclick="metricaToggleFiltro()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-      Filtrar
-      <span class="metricas-filter-badge" id="metricaFiltroBadge" style="display:none">!</span>
-    </button>
-  </div>
-  <!-- Panel de filtro -->
-  <div class="metricas-filtro-panel" id="metricaFiltroPanel" style="display:none">
-    <div class="metricas-filtro-inner">
-      <div class="metricas-filtro-group">
-        <div class="metricas-filtro-label">Año</div>
-        <div class="metricas-filtro-pills" id="metricaYearPills">
-          <div class="metricas-pill active" data-val="todos" onclick="metricaSetYear(this)">Todos</div>
-          <div class="metricas-pill" data-val="2023" onclick="metricaSetYear(this)">2023</div>
-          <div class="metricas-pill" data-val="2024" onclick="metricaSetYear(this)">2024</div>
-          <div class="metricas-pill" data-val="2025" onclick="metricaSetYear(this)">2025</div>
-          <div class="metricas-pill" data-val="2026" onclick="metricaSetYear(this)">2026</div>
-        </div>
-      </div>
-      <div class="metricas-filtro-group">
-        <div class="metricas-filtro-label">Rango de fecha de uso</div>
-        <div class="metricas-filtro-dates">
-          <div><label>Desde</label><input type="date" id="metricaDesde" onchange="metricaApplyFilter()"></div>
-          <div><label>Hasta</label><input type="date" id="metricaHasta" onchange="metricaApplyFilter()"></div>
-        </div>
-      </div>
-      <button class="metricas-filtro-clear" onclick="metricaLimpiarFiltro()">Limpiar filtros</button>
-    </div>
-  </div>
-  <div id="metricaMain" style="display:flex;flex-direction:column;gap:16px;margin-top:16px"></div>
 </div>
 
 </main>
@@ -1797,7 +1748,6 @@ function showPage(id) {
   });
   if(id==='consultas') renderConsulta();
   if(id==='dashboard') renderDashboard();
-  if(id==='metricas') initMetricas();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1822,30 +1772,265 @@ function renderYearTabs(containerId, currentYear, onSelectFn) {
 // ═══════════════════════════════════════════════════════════════
 function setDashYear(año) { dashYear = año; renderDashboard(); }
 
+// Navega a Consultas filtrando por query (nombre o catálogo)
+function irAConsultasConFiltro(q) {
+  consultaQuery = q.toLowerCase();
+  consultaYear  = 'todos';
+  consultaFilter = 'todos';
+  const input = document.getElementById('consulta-input');
+  if (input) input.value = q;
+  showPage('consultas');
+}
+
+let _dashRange = 60;
+function dashSetRange(n, btn) {
+  _dashRange = n;
+  document.querySelectorAll('.dash-rpill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  _dashRenderCal();
+}
+
 function renderDashboard() {
+  if (!stock || !stock.length) return;
   renderYearTabs('dash-year-tabs', dashYear, 'setDashYear');
-  const filtered = dashYear==='todos' ? stock : stock.filter(i=>getAnio(i)===dashYear);
-  document.getElementById('stat-total').textContent = filtered.length;
-  document.getElementById('stat-disp').textContent  = filtered.filter(i=>getEstado(i)==='disponible').length;
-  document.getElementById('stat-baja').textContent  = filtered.filter(i=>getEstado(i)==='baja').length;
-  document.getElementById('stat-vence').textContent = filtered.filter(i=>getEstado(i)==='vence').length;
-  document.getElementById('stat-vencido').textContent = filtered.filter(i=>getEstado(i)==='vencido').length;
-  const sorted = [...filtered]
-    .sort((a,b) => {
-      // Primero por año de hoja descendente (2026 > 2025 > ... > 2022)
-      const yearDiff = (b.sheetName || '').localeCompare(a.sheetName || '');
-      if (yearDiff !== 0) return yearDiff;
-      // Después por fecha dentro del mismo año
-      return parseFecha(b.fecha) - parseFecha(a.fecha);
-    })
-    .slice(0, 10);
-  document.getElementById('dash-tbody').innerHTML = sorted.length
-    ? sorted.map(i=>`<tr>
-        <td>${fmtFecha(i.fecha)}</td><td>${yearBadge(getAnio(i))}</td>
-        <td>${htmlEsc(i.nombre)}</td><td><span class="mono">${htmlEsc(i.catalogo)}</span></td>
-        <td><span class="lote-badge">${htmlEsc(i.lote)}</span></td><td>${estadoBadge(i)}</td>
-      </tr>`).join('')
-    : '<tr><td colspan="6" style="text-align:center;color:var(--dim);padding:32px">Sin datos</td></tr>';
+  const filtered = dashYear === 'todos' ? stock : stock.filter(i => getAnio(i) === dashYear);
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const diff = d => Math.round((d - hoy) / 86400000);
+  const fmtD = d => d.toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit', year:'numeric'});
+  const fmtS = d => d.toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit'});
+  const ARR = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:var(--dim);opacity:0;transition:.15s" class="dash-row-arr"><polyline points="9 18 15 12 9 6"/></svg>`;
+
+  // ── VENCIMIENTOS ────────────────────────────────
+  const vencItems = filtered
+    .filter(i => { const e = getEstado(i); return e === 'vencido' || e === 'vence'; })
+    .sort((a, b) => parseFecha(a.vencimiento) - parseFecha(b.vencimiento));
+
+  document.getElementById('stat-vencido').textContent = filtered.filter(i => getEstado(i) === 'vencido').length;
+  document.getElementById('stat-vence').textContent   = filtered.filter(i => getEstado(i) === 'vence').length;
+  document.getElementById('dash-venc-count').textContent = vencItems.length + ' insumo' + (vencItems.length !== 1 ? 's' : '');
+
+  document.getElementById('dash-venc-list').innerHTML = vencItems.length
+    ? vencItems.map(i => {
+        const d = parseFecha(i.vencimiento);
+        const n = diff(d);
+        const cls = n < 0 ? 'vencido' : n <= 14 ? 'critico' : 'proximo';
+        const label = n < 0 ? `Venció hace ${Math.abs(n)}d` : n === 0 ? 'Vence hoy' : `Vence en ${n}d`;
+        return `<div class="dash-venc-item" onclick="irAConsultasConFiltro('${htmlEsc(i.catalogo)}')" onmouseenter="this.querySelector('.dash-row-arr').style.opacity='1'" onmouseleave="this.querySelector('.dash-row-arr').style.opacity='0'">
+          <div class="dash-venc-bar ${cls}"></div>
+          <div class="dash-venc-body">
+            <div class="dash-venc-nombre">${htmlEsc(i.nombre)}</div>
+            <div class="dash-venc-meta"><span>${fmtD(d)}</span><span style="font-family:'IBM Plex Mono',monospace">${htmlEsc(i.lote)}</span></div>
+          </div>
+          <div class="dash-venc-badge ${cls}">${label}</div>
+          ${ARR}
+        </div>`;
+      }).join('')
+    : '<div class="dash-empty">Sin vencidos ni por vencer ✓</div>';
+
+  // ── BAJO STOCK / SIN STOCK ──────────────────────
+  // Agrupa disponibles por catálogo
+  const dispByCat = {};
+  const bajaByCat = {};
+  filtered.forEach(i => {
+    const cat = stripAI(i.catalogo || '');
+    if (!cat) return;
+    const est = getEstado(i);
+    if (est === 'disponible' || est === 'vence') {
+      dispByCat[cat] = dispByCat[cat] || {nombre: i.nombre, cat, unidades: 0};
+      dispByCat[cat].unidades++;
+    }
+    if (est === 'baja' || est === 'bajo') {
+      const fin = parseFecha(i.finConsumo);
+      const diasDesde = diff(fin) * -1; // positivo = hace N días
+      if (!bajaByCat[cat] || diasDesde < bajaByCat[cat].diasDesde) {
+        bajaByCat[cat] = {nombre: i.nombre, cat, diasDesde, fin};
+      }
+    }
+  });
+
+  const LIMITE_DIAS = 60;
+  const ssItems = [];
+  // Sin stock: cat en bajaByCat, no en dispByCat, ultima baja <= 60d
+  Object.entries(bajaByCat).forEach(([cat, info]) => {
+    if (!dispByCat[cat] && info.diasDesde <= LIMITE_DIAS) {
+      ssItems.push({...info, tipo:'sinstock', unidades:0});
+    }
+  });
+  // Stock bajo: 1-2 unidades, ultima baja <= 60d
+  Object.entries(dispByCat).forEach(([cat, info]) => {
+    if (info.unidades <= 2 && bajaByCat[cat] && bajaByCat[cat].diasDesde <= LIMITE_DIAS) {
+      ssItems.push({...info, tipo:'bajo', diasDesde: bajaByCat[cat].diasDesde});
+    }
+  });
+  ssItems.sort((a,b) => (a.tipo === b.tipo ? a.diasDesde - b.diasDesde : a.tipo === 'sinstock' ? -1 : 1));
+
+  document.getElementById('dash-ss-count').textContent = ssItems.length + ' insumo' + (ssItems.length !== 1 ? 's' : '');
+
+  const sinstock = ssItems.filter(s => s.tipo === 'sinstock');
+  const bajo     = ssItems.filter(s => s.tipo === 'bajo');
+  const ubLabel  = n => n === 0 ? 'hoy' : `hace ${n}d`;
+
+  let ssHtml = '';
+  if (sinstock.length) {
+    ssHtml += `<div class="dash-ss-divider">Sin stock · ${sinstock.length}</div>`;
+    ssHtml += sinstock.map(s => `<div class="dash-ss-item" onclick="irAConsultasConFiltro('${htmlEsc(s.cat)}')" onmouseenter="this.querySelector('.dash-row-arr').style.opacity='1'" onmouseleave="this.querySelector('.dash-row-arr').style.opacity='0'">
+      <div class="dash-ss-body">
+        <div class="dash-ss-nombre">${htmlEsc(s.nombre)}</div>
+        <div class="dash-ss-cat">${htmlEsc(s.cat)}</div>
+      </div>
+      <div class="dash-ss-right">
+        <div class="dash-ss-badge sinstock">0 unidades</div>
+        <div class="dash-ss-ub">Última baja ${ubLabel(s.diasDesde)}</div>
+      </div>
+      ${ARR}
+    </div>`).join('');
+  }
+  if (bajo.length) {
+    ssHtml += `<div class="dash-ss-divider">Stock bajo · ${bajo.length}</div>`;
+    ssHtml += bajo.map(s => `<div class="dash-ss-item" onclick="irAConsultasConFiltro('${htmlEsc(s.cat)}')" onmouseenter="this.querySelector('.dash-row-arr').style.opacity='1'" onmouseleave="this.querySelector('.dash-row-arr').style.opacity='0'">
+      <div class="dash-ss-body">
+        <div class="dash-ss-nombre">${htmlEsc(s.nombre)}</div>
+        <div class="dash-ss-cat">${htmlEsc(s.cat)}</div>
+      </div>
+      <div class="dash-ss-right">
+        <div class="dash-ss-badge bajo">${s.unidades} unidad${s.unidades > 1 ? 'es' : ''}</div>
+        <div class="dash-ss-ub">Última baja ${ubLabel(s.diasDesde)}</div>
+      </div>
+      ${ARR}
+    </div>`).join('');
+  }
+  document.getElementById('dash-ss-list').innerHTML = ssHtml || '<div class="dash-empty">Sin alertas de stock ✓</div>';
+
+  // ── ERRORES DE CARGA ────────────────────────────
+  const errores = [];
+
+  // 1. Fechas imposibles (vencimiento)
+  const YEAR_MIN = 2000, YEAR_MAX = new Date().getFullYear() + 15;
+  filtered.forEach(i => {
+    if (!i.vencimiento || i.vencimiento.toUpperCase() === 'NA') return;
+    const d = parseFecha(i.vencimiento);
+    if (!d || isNaN(d)) return;
+    const y = d.getFullYear();
+    if (y < YEAR_MIN || y > YEAR_MAX) {
+      errores.push({tipo:'fecha', icon:'📅', nombre: i.nombre, catalogo: i.catalogo,
+        desc: `Fecha de vencimiento <code>${htmlEsc(i.vencimiento)}</code> parece incorrecta (año ${y})`, badge:'FECHA'});
+    }
+  });
+
+  // 2. Fecha inicio > fecha fin (error lógico)
+  filtered.forEach(i => {
+    if (!i.inicioConsumo || !i.finConsumo) return;
+    if (i.inicioConsumo.toUpperCase() === 'NA' || i.finConsumo.toUpperCase() === 'NA') return;
+    const ini = parseFecha(i.inicioConsumo);
+    const fin = parseFecha(i.finConsumo);
+    if (ini && fin && !isNaN(ini) && !isNaN(fin) && fin < ini) {
+      errores.push({tipo:'logico', icon:'⚠️', nombre: i.nombre, catalogo: i.catalogo,
+        desc: `Fin de uso <code>${htmlEsc(i.finConsumo)}</code> es anterior al inicio <code>${htmlEsc(i.inicioConsumo)}</code>`, badge:'LÓGICO'});
+    }
+  });
+
+  // 3. Inconsistencias: mismo nombre → múltiples catálogos distintos
+  const catByNombre = {};
+  filtered.forEach(i => {
+    const n = (i.nombre || '').trim().toLowerCase();
+    const c = stripAI(i.catalogo || '').trim().toUpperCase();
+    if (!n || !c) return;
+    if (!catByNombre[n]) catByNombre[n] = new Set();
+    catByNombre[n].add(c);
+  });
+  Object.entries(catByNombre).forEach(([nombre, cats]) => {
+    if (cats.size > 1) {
+      const sample = filtered.find(i => i.nombre.trim().toLowerCase() === nombre);
+      errores.push({tipo:'incons', icon:'🔀', nombre: sample?.nombre || nombre, catalogo: sample?.catalogo || '',
+        desc: `${cats.size} catálogos distintos para este insumo: <code>${[...cats].join('</code>, <code>')}</code>`, badge:'CATÁLOGO'});
+    }
+  });
+
+  // 4. Mismo catálogo → múltiples nombres distintos
+  const nombreByCat = {};
+  filtered.forEach(i => {
+    const c = stripAI(i.catalogo || '').trim().toUpperCase();
+    const n = (i.nombre || '').trim();
+    if (!c || !n) return;
+    if (!nombreByCat[c]) nombreByCat[c] = new Set();
+    nombreByCat[c].add(n);
+  });
+  Object.entries(nombreByCat).forEach(([cat, nombres]) => {
+    if (nombres.size > 1) {
+      const sample = filtered.find(i => stripAI(i.catalogo||'').trim().toUpperCase() === cat);
+      errores.push({tipo:'incons', icon:'🔀', nombre: [...nombres][0], catalogo: sample?.catalogo || cat,
+        desc: `Catálogo <code>${cat}</code> tiene ${nombres.size} nombres distintos: <code>${[...nombres].join('</code>, <code>')}</code>`, badge:'NOMBRE'});
+    }
+  });
+
+  document.getElementById('stat-errores').textContent = errores.length;
+  document.getElementById('dash-err-count').textContent = errores.length + ' detectado' + (errores.length !== 1 ? 's' : '');
+
+  document.getElementById('dash-err-list').innerHTML = errores.length
+    ? errores.map(e => `<div class="dash-err-item" onclick="irAConsultasConFiltro('${htmlEsc(e.catalogo || e.nombre)}')" onmouseenter="this.querySelector('.dash-row-arr').style.opacity='1'" onmouseleave="this.querySelector('.dash-row-arr').style.opacity='0'" title="Click para ver en Consultas">
+        <div class="dash-err-icon ${e.tipo}">${e.icon}</div>
+        <div class="dash-err-body">
+          <div class="dash-err-nombre">${htmlEsc(e.nombre)}</div>
+          <div class="dash-err-desc">${e.desc}</div>
+        </div>
+        <div class="dash-err-badge ${e.tipo}">${e.badge}</div>
+        ${ARR}
+      </div>`).join('')
+    : '<div class="dash-empty">Sin errores detectados ✓</div>';
+
+  // ── CALENDARIO ──────────────────────────────────
+  _dashRenderCal();
+}
+
+function _dashRenderCal() {
+  if (!stock || !stock.length) return;
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const diff = d => Math.round((d - hoy) / 86400000);
+  const fmtS = d => d.toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit'});
+  const filtered = dashYear === 'todos' ? stock : stock.filter(i => getAnio(i) === dashYear);
+
+  const proximos = filtered
+    .filter(i => { const e = getEstado(i); return (e === 'vence' || e === 'disponible') && i.vencimiento && i.vencimiento.toUpperCase() !== 'NA'; })
+    .map(i => ({ nombre: i.nombre, lote: i.lote, catalogo: i.catalogo, d: parseFecha(i.vencimiento) }))
+    .filter(p => { const n = diff(p.d); return n >= 0 && n <= _dashRange; })
+    .sort((a, b) => a.d - b.d);
+
+  const byMonth = {};
+  proximos.forEach(p => {
+    const key = p.d.toLocaleDateString('es-AR', {month:'long', year:'numeric'});
+    if (!byMonth[key]) byMonth[key] = [];
+    byMonth[key].push(p);
+  });
+
+  const maxN = Math.max(...Object.values(byMonth).map(a => a.length), 1);
+  const wrap = document.getElementById('dash-cal-wrap');
+
+  if (!proximos.length) {
+    wrap.innerHTML = '<div class="dash-empty">Sin vencimientos en este período</div>';
+    return;
+  }
+
+  wrap.innerHTML = Object.entries(byMonth).map(([mes, items]) => {
+    const rows = items.map(p => {
+      const n = diff(p.d);
+      const cls = n <= 7 ? 'd7' : n <= 30 ? 'd30' : n <= 60 ? 'd60' : 'd90';
+      const label = n === 0 ? 'hoy' : n === 1 ? 'mañana' : n + 'd';
+      return `<div class="dash-cal-item" onclick="irAConsultasConFiltro('${htmlEsc(p.catalogo)}')">
+        <div class="dash-cal-fecha">${fmtS(p.d)}</div>
+        <div class="dash-cal-nombre">${htmlEsc(p.nombre)}</div>
+        <div class="dash-cal-lote">${htmlEsc(p.lote)}</div>
+        <div class="dash-cal-dias ${cls}">${label}</div>
+      </div>`;
+    }).join('');
+    return `<div class="dash-cal-month">
+      <div class="dash-cal-month-hdr">
+        <div class="dash-cal-month-name">${mes}</div>
+        <div class="dash-cal-month-bar"><div class="dash-cal-month-fill" style="width:${(items.length/maxN*100).toFixed(0)}%"></div></div>
+        <div class="dash-cal-month-n">${items.length}</div>
+      </div>
+      ${rows}
+    </div>`;
+  }).join('');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -4077,475 +4262,6 @@ function lookupBDAndFill(rawCode, context) {
   return true;
 }
 
-// ══════════════════════════════════════════════════
-// MÉTRICAS
-// ══════════════════════════════════════════════════
-
-// ── Días hábiles Argentina ────────────────────────
-const _FERIADOS_FIJOS = [[1,1],[24,3],[2,4],[1,5],[25,5],[20,6],[9,7],[17,8],[8,12],[25,12]];
-const _FERIADOS_VAR = new Set([
-  '2023-02-20','2023-02-21','2023-04-06','2023-04-07','2023-10-13','2023-11-20',
-  '2024-02-12','2024-02-13','2024-03-28','2024-03-29','2024-04-01','2024-10-11','2024-11-18',
-  '2025-03-03','2025-03-04','2025-04-17','2025-04-18','2025-04-02','2025-10-10','2025-11-21',
-  '2026-02-16','2026-02-17','2026-04-02','2026-04-03','2026-10-09','2026-11-20',
-]);
-function _esDiaHabil(d) {
-  const dow = d.getDay();
-  if (dow===0||dow===6) return false;
-  const m=d.getMonth()+1, day=d.getDate();
-  if (_FERIADOS_FIJOS.some(([fd,fm])=>fd===day&&fm===m)) return false;
-  return !_FERIADOS_VAR.has(d.toISOString().slice(0,10));
-}
-function _diasHabiles(d1, d2) {
-  if (!d1||!d2) return null;
-  let count=0, cur=new Date(d1); cur.setHours(0,0,0,0);
-  const end=new Date(d2); end.setHours(0,0,0,0);
-  while(cur<end){if(_esDiaHabil(cur))count++;cur.setDate(cur.getDate()+1);}
-  return count;
-}
-function _parseDateDMY(str) {
-  if(!str||str.toUpperCase()==='NA') return null;
-  str = str.trim();
-  if(str.includes('/')) {
-    const p=str.split('/');
-    if(p.length===3) { const d=new Date(+p[2],+p[1]-1,+p[0]); return isNaN(d)?null:d; }
-  }
-  // ISO YYYY-MM-DD or other formats
-  const d=new Date(str);
-  return isNaN(d)?null:d;
-}
-
-// ── Estado del módulo ─────────────────────────────
-let metricaSelected = null; // {nombre, catalogo}
-let metricaAcIndex = -1;
-let metricaAcItems = [];
-let _mRendChart = null;
-let _mDurChart = null;
-let _metricaCache = []; // lista pre-cacheada de insumos únicos (sin 2022/2023)
-// Filtros de métricas
-let metricaFiltroYear = 'todos';
-let metricaFiltroDesde = '';
-let metricaFiltroHasta = '';
-let _metricaBDCache = null; // cache de datos construidos
-
-// Fuente de datos: derivado del stock cargado
-function _buildMetricaData(catalogo) {
-  const cat = catalogo.toUpperCase();
-  const unidades = stock
-    .filter(s => !METRICAS_HOJAS_EXCLUIDAS.has(s.sheetName) && stripAI(s.catalogo||'').toUpperCase() === cat)
-    .map(s => {
-      const estado = s._estado || getEstado(s);
-      return {
-        lote:   s.lote,
-        estado,
-        inicio: s.inicioConsumo || null,
-        fin:    s.finConsumo    || null,
-        rend:   s.rendimiento   ? parseFloat(s.rendimiento) : null,
-        year:   s.sheetName     || '',
-      };
-    });
-  // Aplicar filtros de año y rango de fecha
-  const filtered = unidades.filter(u => {
-    if(metricaFiltroYear !== 'todos' && u.year !== metricaFiltroYear) return false;
-    if(metricaFiltroDesde || metricaFiltroHasta) {
-      // Filtrar por fecha de inicio de uso (o fecha de llegada si no hay inicio)
-      const fechaRef = _parseDateDMY(u.inicio);
-      if(!fechaRef) return true; // sin fecha, incluir siempre
-      if(metricaFiltroDesde && fechaRef < new Date(metricaFiltroDesde)) return false;
-      if(metricaFiltroHasta && fechaRef > new Date(metricaFiltroHasta)) return false;
-    }
-    return true;
-  });
-  const tieneRendimiento = filtered.some(u => u.rend !== null && !isNaN(u.rend));
-  return { unidades: filtered, tieneRendimiento, rendLabel: 'muestras procesadas' };
-}
-
-// ── Autocomplete ──────────────────────────────────
-const METRICAS_HOJAS_EXCLUIDAS = new Set(['2022', '2023']);
-
-function _metricaAcItems(q) {
-  const ql = q.toLowerCase();
-  return _metricaCache.filter(item =>
-    item.nombre.toLowerCase().includes(ql) ||
-    item.catalogo.toLowerCase().includes(ql)
-  ).slice(0, 10);
-}
-
-function _buildMetricaCache() {
-  const seen = new Set();
-  _metricaCache = [];
-  for (const s of stock) {
-    if (METRICAS_HOJAS_EXCLUIDAS.has(s.sheetName)) continue;
-    const cat = stripAI(s.catalogo || '');
-    const key = (s.nombre || '') + '|' + cat;
-    if (seen.has(key) || !s.nombre || !cat) continue;
-    seen.add(key);
-    _metricaCache.push({ nombre: s.nombre, catalogo: cat });
-  }
-  _metricaCache.sort((a, b) => a.nombre.localeCompare(b.nombre));
-}
-function _metricaHighlight(text, q) {
-  if(!q) return text;
-  const idx = text.toLowerCase().indexOf(q.toLowerCase());
-  if(idx<0) return text;
-  return text.slice(0,idx)+'<span class="metricas-ac-mark">'+text.slice(idx,idx+q.length)+'</span>'+text.slice(idx+q.length);
-}
-function metricaOnInput() {
-  const q = document.getElementById('metricaSearch').value.trim();
-  document.getElementById('metricaClear').style.display = q?'block':'none';
-  if(!q){metricaHideDrop();return;}
-  metricaAcItems = _metricaAcItems(q);
-  metricaAcIndex = -1;
-  metricaRenderDrop(q);
-}
-function metricaRenderDrop(q='') {
-  const dd = document.getElementById('metricaAcDrop');
-  if(!metricaAcItems.length){dd.innerHTML='<div style="padding:10px 14px;font-size:12px;color:var(--dim)">Sin resultados</div>';dd.classList.add('show');return;}
-  dd.innerHTML = metricaAcItems.map((item,i)=>`
-    <div class="metricas-ac-item${i===metricaAcIndex?' m-active':''}" onmousedown="metricaSelect(${i})">
-      <div class="metricas-ac-main">${_metricaHighlight(item.nombre,q)}</div>
-      <div class="metricas-ac-cat">${item.catalogo}</div>
-    </div>`).join('');
-  dd.classList.add('show');
-}
-function metricaShowDrop(){const q=document.getElementById('metricaSearch').value.trim();if(q)metricaOnInput();}
-function metricaHideDrop(){document.getElementById('metricaAcDrop').classList.remove('show');metricaAcIndex=-1;}
-function metricaOnKey(e){
-  if(e.key==='ArrowDown'){metricaAcIndex=Math.min(metricaAcIndex+1,metricaAcItems.length-1);metricaRenderDrop(document.getElementById('metricaSearch').value);}
-  else if(e.key==='ArrowUp'){metricaAcIndex=Math.max(metricaAcIndex-1,0);metricaRenderDrop(document.getElementById('metricaSearch').value);}
-  else if(e.key==='Enter'&&metricaAcIndex>=0)metricaSelect(metricaAcIndex);
-  else if(e.key==='Escape')metricaHideDrop();
-}
-function metricaSelect(i) {
-  metricaSelected = metricaAcItems[i];
-  _mHistorialExpanded = false;
-  document.getElementById('metricaSearch').value='';
-  document.getElementById('metricaClear').style.display='none';
-  metricaHideDrop();
-  document.getElementById('metricaActiveChip').style.display='flex';
-  document.getElementById('metricaChipName').textContent=metricaSelected.nombre;
-  document.getElementById('metricaChipCat').textContent=metricaSelected.catalogo;
-  document.getElementById('metricaNoSel').style.display='none';
-  metricaRenderMain();
-}
-function metricaClearSelection(){metricaSelected=null;document.getElementById('metricaActiveChip').style.display='none';document.getElementById('metricaNoSel').style.display='flex';metricaRenderMain();}
-function metricaClearInput(){document.getElementById('metricaSearch').value='';document.getElementById('metricaClear').style.display='none';metricaHideDrop();}
-document.addEventListener('click',e=>{if(!e.target.closest('.metricas-search-wrap'))metricaHideDrop();});
-
-// ── Render principal ──────────────────────────────
-function metricaRenderMain() {
-  const main = document.getElementById('metricaMain');
-  if(!metricaSelected){metricaRenderGlobal(main);return;}
-  const data = _buildMetricaData(metricaSelected.catalogo);
-  if(!data.unidades.length){metricaRenderSinDatos(main);return;}
-  metricaRenderInsumo(main, metricaSelected, data);
-}
-
-// ── Vista global ──────────────────────────────────
-function metricaRenderGlobal(main) {
-  // Calcula alertas y proyecciones reales del stock
-  const ahora = new Date();
-  const alertas = [];
-  const agot = [];
-  const seen = new Set();
-  for (const s of stock) {
-    const cat = stripAI(s.catalogo||'');
-    if (!cat||seen.has(cat)) continue;
-    const data = _buildMetricaData(cat);
-    const FECHA_INVALIDA = (s) => !s || s.trim().toUpperCase() === 'NA' || s.trim() === '-' || s.trim() === '0';
-  usadas = data.unidades.filter(u =>
-    (u.estado==='baja' || u.estado==='bajo') &&
-    u.inicio && u.fin &&
-    !FECHA_INVALIDA(u.inicio) && !FECHA_INVALIDA(u.fin)
-  );
-    const disp = data.unidades.filter(u=>u.estado==='disponible').length + data.unidades.filter(u=>u.estado==='activo'||u.estado==='disponible').length;
-    const durs = usadas.map(u=>{const d=_diasHabiles(_parseDateDMY(u.inicio),_parseDateDMY(u.fin));return d;}).filter(d=>d>0);
-    const avg = durs.length ? Math.round(durs.reduce((a,b)=>a+b,0)/durs.length) : null;
-    const totalDisp = data.unidades.filter(u=>u.estado==='disponible').length;
-    const proy = avg && totalDisp ? totalDisp*avg : null;
-    const nombre = s.nombre||cat;
-    seen.add(cat);
-    // Vencidos sin dar de baja
-    const venc = data.unidades.filter(u=>u.estado==='vencido');
-    if(venc.length) alertas.push({type:'amber',icon:'⚠️',title:nombre,desc:`${venc.length} unidad(es) vencida(s) sin dar de baja`,badge:'VENCIDO',bc:'amber'});
-    if(proy!==null&&proy<30) alertas.push({type:'red',icon:'🔴',title:nombre,desc:`Agotamiento en ~${proy} días hábiles`,badge:'URGENTE',bc:'red'});
-    else if(proy!==null&&proy<60) alertas.push({type:'amber',icon:'⚠️',title:nombre,desc:`Stock bajo — ~${proy} días hábiles estimados`,badge:'ATENCIÓN',bc:'amber'});
-    if(proy!==null) agot.push({name:nombre,stock:totalDisp,dias:proy,cls:proy<30?'urgent':proy<60?'warn':'ok',color:proy<30?'#e05252':proy<60?'#e6a817':'#4ecb71'});
-  }
-  agot.sort((a,b)=>a.dias-b.dias);
-  const topAgot = agot.slice(0,6);
-
-  // Si no hay datos reales, muestra placeholders
-  const alertasHTML = alertas.length
-    ? alertas.slice(0,8).map(a=>`<div class="m-alert-item">
-        <div class="m-alert-icon ${a.type}">${a.icon}</div>
-        <div class="m-alert-body"><div class="m-alert-title">${a.title}</div><div class="m-alert-desc">${a.desc}</div></div>
-        <div class="m-alert-badge ${a.bc}">${a.badge}</div>
-      </div>`).join('')
-    : '<div style="font-size:12px;color:var(--dim);padding:8px 0">✓ Sin alertas activas. Sincronizá para actualizar.</div>';
-
-  const agotHTML = topAgot.length
-    ? topAgot.map(item=>`<div class="m-agot-item">
-        <div class="m-agot-name"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px">${item.name}</span><span class="m-days-badge ${item.cls}">~${item.dias}dh</span></div>
-        <div class="m-agot-bar-wrap"><div class="m-agot-bar" style="width:${Math.min(item.dias/120*100,100).toFixed(0)}%;background:${item.color}80;border-right:2px solid ${item.color}"></div></div>
-        <div class="m-agot-meta"><span>${item.stock} uds disponibles</span><span>días hábiles estimados</span></div>
-      </div>`).join('')
-    : '<div style="font-size:12px;color:var(--dim);padding:8px 0">Sin datos suficientes. Sincronizá el stock.</div>';
-
-  main.innerHTML=`<div class="m-sub-note">Seleccioná un insumo para ver sus métricas detalladas. Mostrando resumen global.</div>
-  <div class="m-grid-2">
-    <div class="m-card">
-      <div class="m-card-header"><div><div class="m-card-title">Alertas activas — todos los insumos</div><div class="m-card-sub">Ordenadas por urgencia</div></div></div>
-      ${alertasHTML}
-    </div>
-    <div class="m-card">
-      <div class="m-card-header"><div><div class="m-card-title">Proyección de agotamiento</div><div class="m-card-sub">Días hábiles según tasa de consumo histórico</div></div></div>
-      ${agotHTML}
-    </div>
-  </div>`;
-}
-
-// ── Sin datos ─────────────────────────────────────
-function metricaRenderSinDatos(main) {
-  main.innerHTML=`<div class="m-empty">
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <p>No hay historial de consumo registrado para <strong style="color:var(--text)">${metricaSelected.nombre}</strong>.<br>Las métricas aparecen cuando se registran bajas con fechas de inicio y fin de uso.</p>
-  </div>`;
-}
-
-// ── Vista de insumo ───────────────────────────────
-function metricaRenderInsumo(main, insumo, data) {
-  if(_mDurChart){_mDurChart.destroy();_mDurChart=null;}
-  if(_mRendChart){_mRendChart.destroy();_mRendChart=null;}
-
-  const FECHA_INVALIDA = (s) => !s || s.trim().toUpperCase() === 'NA' || s.trim() === '-' || s.trim() === '0';
-  usadas = data.unidades.filter(u =>
-    (u.estado==='baja' || u.estado==='bajo') &&
-    u.inicio && u.fin &&
-    !FECHA_INVALIDA(u.inicio) && !FECHA_INVALIDA(u.fin)
-  );
-  const disponibles = data.unidades.filter(u=>u.estado==='disponible').length;
-  const activas = data.unidades.filter(u=>u.estado==='activo').length;
-  const totalStock = disponibles + activas;
-
-  const duraciones = usadas.map(u=>{
-    const d1 = _parseDateDMY(u.inicio);
-    const d2 = _parseDateDMY(u.fin);
-    // Excluir si alguna fecha es inválida, NA o si la diferencia es absurda (>500dh)
-    if(!d1 || !d2) return null;
-    const dh = _diasHabiles(d1, d2);
-    if(dh === null || dh <= 0 || dh > 500) return null;
-    return {lote: u.lote, dias: dh, rend: u.rend};
-  }).filter(Boolean);
-
-  const avgDur = duraciones.length ? Math.round(duraciones.reduce((a,b)=>a+b.dias,0)/duraciones.length) : null;
-  const lastDur = duraciones.length ? duraciones[duraciones.length-1].dias : null;
-  const velocidad = avgDur ? (22/avgDur).toFixed(1) : '—';
-  const proyDias = avgDur && totalStock ? totalStock*avgDur : null;
-  const proyCls = !proyDias?'neutral':proyDias<30?'bad':proyDias<60?'neutral':'good';
-
-  // Alertas específicas
-  const alertasInsumo = [];
-  const venc = data.unidades.filter(u=>u.estado==='vencido');
-  if(venc.length) alertasInsumo.push({type:'amber',icon:'⚠️',title:`${venc.length} unidad(es) vencida(s) sin dar de baja`,desc:'Revisá el estado de estos lotes.',badge:'VENCIDO',bc:'amber'});
-  if(proyDias!==null&&proyDias<30) alertasInsumo.push({type:'red',icon:'🔴',title:'Stock crítico',desc:`Agotamiento estimado en ${proyDias} días hábiles.`,badge:'URGENTE',bc:'red'});
-  else if(proyDias!==null&&proyDias<60) alertasInsumo.push({type:'amber',icon:'⚠️',title:'Stock bajo',desc:`Considerar reposición. ~${proyDias} días hábiles restantes.`,badge:'ATENCIÓN',bc:'amber'});
-
-  // Intervalo entre usos
-  const inicios = data.unidades.filter(u=>u.inicio).map(u=>_parseDateDMY(u.inicio)).filter(Boolean).sort((a,b)=>a-b);
-  const intervalos = [];
-  for(let i=1;i<inicios.length;i++) intervalos.push(_diasHabiles(inicios[i-1],inicios[i]));
-  const avgInt = intervalos.length?Math.round(intervalos.reduce((a,b)=>a+b,0)/intervalos.length):null;
-  const maxInt = intervalos.length?Math.max(...intervalos):null;
-  const minInt = intervalos.length?Math.min(...intervalos):null;
-  const lastInt = intervalos.length?intervalos[intervalos.length-1]:null;
-
-  // Rendimiento
-  const rendUsadas = data.unidades.filter(u=>u.rend!==null&&!isNaN(u.rend)&&(u.estado==='baja'||u.estado==='bajo'));
-  const avgRend = rendUsadas.length?Math.round(rendUsadas.reduce((a,b)=>a+b.rend,0)/rendUsadas.length):null;
-
-  main.innerHTML=`
-  <div class="m-kpi-row">
-    <div class="m-kpi purple"><div class="m-kpi-label">Unidades en stock</div><div class="m-kpi-value">${totalStock}</div><div class="m-kpi-sub">${disponibles} disponibles · ${activas} en uso</div><div class="m-kpi-trend neutral">—</div></div>
-    <div class="m-kpi amber"><div class="m-kpi-label">Agotamiento estimado</div><div class="m-kpi-value">${proyDias?'~'+proyDias+'dh':'—'}</div><div class="m-kpi-sub">días hábiles a tasa actual</div><div class="m-kpi-trend ${proyCls}">${proyDias?(proyDias<30?'⚠ Stock crítico':proyDias<60?'Atención':'Stock suficiente'):'Sin historial'}</div></div>
-    <div class="m-kpi teal"><div class="m-kpi-label">Duración prom. / unidad</div><div class="m-kpi-value">${avgDur?avgDur+'dh':'—'}</div><div class="m-kpi-sub">días hábiles · ${usadas.length} unidades</div><div class="m-kpi-trend ${lastDur&&avgDur?(lastDur>avgDur?'good':'bad'):'neutral'}">${lastDur&&avgDur?(lastDur>avgDur?'↑ Última duró más':'↓ Última duró menos'):'—'}</div></div>
-    <div class="m-kpi blue"><div class="m-kpi-label">Velocidad de consumo</div><div class="m-kpi-value">${velocidad}</div><div class="m-kpi-sub">unidades / mes estimado</div><div class="m-kpi-trend neutral">Basado en duración promedio</div></div>
-  </div>
-  <div class="m-grid-31">
-    <div class="m-card">
-      <div class="m-card-header"><div><div class="m-card-title">Historial de unidades</div><div class="m-card-sub">Duración real de cada lote</div><div class="m-habil-note">🗓 Solo días hábiles · calendario argentino</div></div></div>
-      <div class="m-unit-timeline" id="mUnitTimeline"></div>
-    </div>
-    <div class="m-card">
-      <div class="m-card-header"><div><div class="m-card-title">Duración por lote</div><div class="m-card-sub">días hábiles de uso efectivo</div></div></div>
-      <div style="position:relative;height:220px"><canvas id="mChartDur"></canvas></div>
-    </div>
-  </div>
-  ${data.tieneRendimiento && rendUsadas.length ? `<div class="m-card">
-    <div class="m-card-header"><div><div class="m-card-title">Rendimiento por unidad</div><div class="m-card-sub">${data.rendLabel} · comparativa entre lotes</div></div></div>
-    <div style="position:relative;height:160px"><canvas id="mChartRend"></canvas></div>
-  </div>` : ''}
-  <div class="m-grid-3">
-    <div class="m-card">
-      <div class="m-card-header"><div><div class="m-card-title">Intervalo entre usos</div><div class="m-card-sub">días hábiles entre inicio de unidades consecutivas</div></div></div>
-      <div id="mIntervalList"></div>
-    </div>
-    <div class="m-card">
-      <div class="m-card-header"><div><div class="m-card-title">Proyección de agotamiento</div><div class="m-card-sub">Este insumo · días hábiles</div></div></div>
-      <div id="mAgotInsumo"></div>
-    </div>
-    <div class="m-card">
-      <div class="m-card-header"><div><div class="m-card-title">Alertas</div><div class="m-card-sub">Para este insumo</div></div></div>
-      <div id="mAlertInsumo"></div>
-    </div>
-  </div>`;
-
-  // Unit timeline — max 15, expand on demand
-  const maxD = duraciones.length ? Math.max(...duraciones.map(d=>d.dias)) : 1;
-  const tl = document.getElementById('mUnitTimeline');
-  const HIST_LIMIT = 15;
-  const unidadesShow = _mHistorialExpanded ? data.unidades : data.unidades.slice(0, HIST_LIMIT);
-  unidadesShow.forEach(u=>{
-    const dh = u.inicio&&u.fin?_diasHabiles(_parseDateDMY(u.inicio),_parseDateDMY(u.fin)):null;
-    const barW = dh?`${Math.max(4,(dh/maxD*100)).toFixed(0)}%`:'100%';
-    const estadoKey = u.estado==='baja'||u.estado==='bajo'?'usado':u.estado==='activo'?'activo':'disponible';
-    const label = estadoKey==='usado'?`${u.inicio} → ${u.fin} · ${dh}dh`:estadoKey==='activo'?`En uso desde ${u.inicio}`:'Disponible';
-    tl.innerHTML+=`<div class="m-unit-row">
-      <div class="m-unit-lote" title="${u.lote}">${u.lote}</div>
-      <div class="m-unit-bar-wrap"><div class="m-unit-bar ${estadoKey}" style="width:${barW}">${label}</div></div>
-      <div class="m-unit-dur">${dh!==null?dh+'dh':'—'}</div>
-    </div>`;
-  });
-  if(!_mHistorialExpanded && data.unidades.length > HIST_LIMIT) {
-    tl.innerHTML += `<div class="m-unit-more" onclick="metricaExpandHistorial()">▾ Ver ${data.unidades.length - HIST_LIMIT} unidades más</div>`;
-  }
-
-  // Duración chart
-  if(duraciones.length) {
-    _mDurChart = new Chart(document.getElementById('mChartDur'),{
-      type:'bar',
-      data:{
-        labels:duraciones.map(d=>d.lote.substring(0,9)+'…'),
-        datasets:[
-          {label:'Días hábiles',data:duraciones.map(d=>d.dias),backgroundColor:'rgba(91,142,232,0.5)',borderColor:'#5b8ee8',borderWidth:1,borderRadius:4},
-          ...(avgDur?[{label:`Promedio (${avgDur}dh)`,data:Array(duraciones.length).fill(avgDur),type:'line',borderColor:'rgba(230,168,23,.7)',borderDash:[4,3],borderWidth:1.5,pointRadius:0,fill:false}]:[])
-        ]
-      },
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{position:'top',labels:{boxWidth:8,padding:10,color:'#9d98b0'}}},
-        scales:{x:{grid:{color:'#2e2a3d'},ticks:{color:'#9d98b0'}},y:{grid:{color:'#2e2a3d'},ticks:{color:'#9d98b0',callback:v=>v+'d'}}}}
-    });
-  } else {
-    document.getElementById('mChartDur').parentElement.innerHTML='<div style="font-size:12px;color:var(--dim);padding:20px 0;text-align:center">Sin historial completado aún</div>';
-  }
-
-  // Rendimiento chart
-  if(data.tieneRendimiento && rendUsadas.length && document.getElementById('mChartRend')) {
-    _mRendChart = new Chart(document.getElementById('mChartRend'),{
-      type:'bar',
-      data:{
-        labels:rendUsadas.map(u=>u.lote.substring(0,9)+'…'),
-        datasets:[
-          {label:data.rendLabel,data:rendUsadas.map(u=>u.rend),
-           backgroundColor:rendUsadas.map(u=>avgRend&&u.rend>=avgRend?'rgba(78,203,113,.5)':'rgba(224,82,82,.4)'),
-           borderColor:rendUsadas.map(u=>avgRend&&u.rend>=avgRend?'#4ecb71':'#e05252'),
-           borderWidth:1,borderRadius:4},
-          ...(avgRend?[{label:`Promedio (${avgRend})`,data:Array(rendUsadas.length).fill(avgRend),type:'line',borderColor:'rgba(230,168,23,.7)',borderDash:[4,3],borderWidth:1.5,pointRadius:0,fill:false}]:[])
-        ]
-      },
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{position:'top',labels:{boxWidth:8,padding:10,color:'#9d98b0'}}},
-        scales:{x:{grid:{color:'#2e2a3d'},ticks:{color:'#9d98b0'}},y:{grid:{color:'#2e2a3d'},min:0,ticks:{color:'#9d98b0'}}}}
-    });
-  }
-
-  // Intervalo
-  const intEl = document.getElementById('mIntervalList');
-  [{label:'Promedio general',valor:avgInt},{label:'Último intervalo',valor:lastInt},{label:'Mínimo registrado',valor:minInt},{label:'Máximo registrado',valor:maxInt}].forEach(item=>{
-    if(item.valor===null){intEl.innerHTML+=`<div class="m-interval-row"><div class="m-interval-num" style="color:var(--dim)">—</div><div class="m-interval-label">${item.label}</div></div>`;return;}
-    intEl.innerHTML+=`<div class="m-interval-row">
-      <div class="m-interval-num">${item.valor}dh</div>
-      <div class="m-interval-label">${item.label}</div>
-      <div class="m-interval-bar"><div class="m-interval-fill" style="width:${maxInt?(item.valor/maxInt*100).toFixed(0):0}%"></div></div>
-    </div>`;
-  });
-
-  // Proyección específica
-  const agEl = document.getElementById('mAgotInsumo');
-  if(proyDias!==null){
-    const cls=proyDias<30?'urgent':proyDias<60?'warn':'ok';
-    const col=proyDias<30?'#e05252':proyDias<60?'#e6a817':'#4ecb71';
-    agEl.innerHTML=`<div class="m-agot-item">
-      <div class="m-agot-name"><span>${totalStock} unidades · ${disponibles} disp. + ${activas} activas</span><span class="m-days-badge ${cls}">~${proyDias}dh</span></div>
-      <div class="m-agot-bar-wrap"><div class="m-agot-bar" style="width:${Math.min(proyDias/120*100,100).toFixed(0)}%;background:${col}80;border-right:2px solid ${col}"></div></div>
-      <div class="m-agot-meta"><span>a ${avgDur}dh/unidad promedio</span><span>días hábiles</span></div>
-    </div>`;
-  } else {
-    agEl.innerHTML='<div style="font-size:12px;color:var(--dim);padding:8px 0">Sin historial suficiente para proyectar.</div>';
-  }
-
-  // Alertas específicas
-  const alEl = document.getElementById('mAlertInsumo');
-  if(!alertasInsumo.length){
-    alEl.innerHTML='<div style="font-size:12px;color:var(--dim);padding:8px 0">✓ Sin alertas activas.</div>';
-  } else {
-    alertasInsumo.forEach(a=>{
-      alEl.innerHTML+=`<div class="m-alert-item">
-        <div class="m-alert-icon ${a.type}">${a.icon}</div>
-        <div class="m-alert-body"><div class="m-alert-title">${a.title}</div><div class="m-alert-desc">${a.desc}</div></div>
-        <div class="m-alert-badge ${a.bc}">${a.badge}</div>
-      </div>`;
-    });
-  }
-}
-
-function metricaToggleFiltro() {
-  const panel = document.getElementById('metricaFiltroPanel');
-  const btn = document.getElementById('metricaFiltroBtn');
-  const show = panel.style.display === 'none';
-  panel.style.display = show ? 'block' : 'none';
-  btn.classList.toggle('active', show);
-}
-function metricaSetYear(el) {
-  document.querySelectorAll('#metricaYearPills .metricas-pill').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  metricaFiltroYear = el.dataset.val;
-  metricaApplyFilter();
-}
-function metricaApplyFilter() {
-  metricaFiltroDesde = document.getElementById('metricaDesde').value;
-  metricaFiltroHasta = document.getElementById('metricaHasta').value;
-  const hasFiltro = metricaFiltroYear!=='todos' || metricaFiltroDesde || metricaFiltroHasta;
-  const badge = document.getElementById('metricaFiltroBadge');
-  if(badge) badge.style.display = hasFiltro ? 'inline-flex' : 'none';
-  metricaRenderMain();
-}
-function metricaLimpiarFiltro() {
-  metricaFiltroYear = 'todos';
-  metricaFiltroDesde = '';
-  metricaFiltroHasta = '';
-  document.getElementById('metricaDesde').value = '';
-  document.getElementById('metricaHasta').value = '';
-  document.querySelectorAll('#metricaYearPills .metricas-pill').forEach(p=>p.classList.toggle('active', p.dataset.val==='todos'));
-  document.getElementById('metricaFiltroBadge').style.display = 'none';
-  metricaRenderMain();
-}
-// Historial expandido state
-let _mHistorialExpanded = false;
-function metricaExpandHistorial() {
-  _mHistorialExpanded = true;
-  metricaRenderMain();
-}
-
-// Inicializar cuando se abre la página
-function initMetricas() {
-  if(!stock||!stock.length) { document.getElementById('metricaMain').innerHTML='<div class="m-empty"><p>Sincronizá el stock primero para ver las métricas.</p></div>'; return; }
-  _buildMetricaCache();
-  metricaRenderMain();
-}
-
-// ── FIN MÉTRICAS ──────────────────────────────────
-
 // Close dropdowns on outside click
 document.addEventListener('click', e => {
   ['catalogo','nombre','lote'].forEach(f => {
@@ -4660,7 +4376,6 @@ document.addEventListener('click', e => {
 </div>
 
 <!-- Google APIs -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
 <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
