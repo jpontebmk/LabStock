@@ -1337,7 +1337,10 @@ function setLoginStatus(msg, isError=false) {
 // ═══════════════════════════════════════════════════════════════
 // SHEETS API — READ
 // ═══════════════════════════════════════════════════════════════
+let _syncInProgress = false;
 async function syncFromSheets() {
+  if (_syncInProgress) return; // prevent concurrent syncs
+  _syncInProgress = true;
   setSyncState('syncing', 'Sincronizando…');
   try {
     // 1. Get all sheet names
@@ -1433,6 +1436,8 @@ async function syncFromSheets() {
     console.error(e);
     setSyncState('error', 'Error al sincronizar');
     toast('Error al leer Google Sheets: ' + (e.result?.error?.message || e.message), 'error');
+  } finally {
+    _syncInProgress = false;
   }
 }
 
@@ -1450,7 +1455,9 @@ async function getSheetId(sheetName) {
   if (_sheetIdCache[sheetName] !== undefined) return _sheetIdCache[sheetName];
   const meta = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: SHEET_ID });
   meta.result.sheets.forEach(s => { _sheetIdCache[s.properties.title] = s.properties.sheetId; });
-  return _sheetIdCache[sheetName] ?? null;
+  const id = _sheetIdCache[sheetName];
+  if (id === undefined || id === null) throw new Error(`Hoja "${sheetName}" no encontrada en el archivo.`);
+  return id;
 }
 function invalidateSheetIdCache() { Object.keys(_sheetIdCache).forEach(k => delete _sheetIdCache[k]); }
 
@@ -1693,7 +1700,9 @@ function fmtFecha(str) {
 function toSheetDate(isoStr) {
   // Google Sheets accepts DD/MM/YYYY
   if (!isoStr) return '';
-  const [y,m,d] = isoStr.split('-');
+  const parts = isoStr.split('-');
+  if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) return '';
+  const [y, m, d] = parts;
   return `${d}/${m}/${y}`;
 }
 
@@ -1724,7 +1733,11 @@ function toast(msg, type='success') {
   const c = document.getElementById('toast-container');
   const t = document.createElement('div');
   t.className = `toast toast-${type}`;
-  t.innerHTML = `<span>${type==='success'?'✓':type==='info'?'ℹ':'✕'}</span> ${msg}`;
+  // Use DOM construction instead of innerHTML to avoid HTML injection from API error messages
+  const icon = document.createElement('span');
+  icon.textContent = type==='success'?'✓':type==='info'?'ℹ':'✕';
+  t.appendChild(icon);
+  t.appendChild(document.createTextNode(' ' + msg));
   c.appendChild(t);
   setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),300)}, 4000);
 }
@@ -2505,13 +2518,26 @@ async function confirmarBaja() {
 
   try {
     const item = stock.find(i=>i.id===bajaSelectedId);
-    // Snapshot BEFORE modifying
+    // Snapshot BEFORE modifying (used for log AND for rollback if write fails)
     const estadoAnterior = snapshotItem(item);
+    const _prevInicio = item.inicioConsumo;
+    const _prevFin    = item.finConsumo;
+    const _prevRend   = item.rendimiento;
+    const _prevObs    = item.obs;
     item.inicioConsumo = toSheetDate(inicio);
     item.finConsumo    = toSheetDate(fin);
     item.rendimiento   = rend;
     item.obs           = obs;
-    await updateRowInSheet(item);
+    try {
+      await updateRowInSheet(item);
+    } catch(writeErr) {
+      // Rollback in-memory mutation so state stays consistent with sheet
+      item.inicioConsumo = _prevInicio;
+      item.finConsumo    = _prevFin;
+      item.rendimiento   = _prevRend;
+      item.obs           = _prevObs;
+      throw writeErr; // re-throw to outer catch
+    }
     toast(`✓ Baja registrada: "${item.nombre}" — Lote ${item.lote}`);
     await writeLog('Baja', item,
       `Inicio: ${item.inicioConsumo||'—'} · Fin: ${item.finConsumo||'—'} · Rend: ${item.rendimiento||'—'}`,
@@ -2580,7 +2606,7 @@ function renderACConsulta() {
     if(sugs.length>=6) break;
   }
   if(!sugs.length){list.classList.remove('show');return;}
-  list.innerHTML=sugs.map(s=>`<div class="autocomplete-item" onclick="selectACConsulta('${s.val.replace(/'/g,"\\'")}')"><div class="ac-main">${s.main}</div><div class="ac-sub">${s.sub}</div></div>`).join('');
+  list.innerHTML=sugs.map(s=>`<div class="autocomplete-item" onclick="selectACConsulta('${s.val.replace(/'/g,"\\'")}')"><div class="ac-main">${htmlEsc(s.main)}</div><div class="ac-sub">${htmlEsc(s.sub)}</div></div>`).join('');
   list.classList.add('show');
 }
 function selectACConsulta(val) {
@@ -2996,15 +3022,17 @@ Esta acción no se puede deshacer.`)) return;
       if (!bySheet[i.sheetName]) bySheet[i.sheetName] = [];
       bySheet[i.sheetName].push(i.rowIndex); // rowIndex is already 1-based sheet row
     });
+    // Phase 1: verify ALL rows across ALL sheets before touching anything
+    // This prevents partial deletion (some sheets deleted, others not) on integrity error
+    for (const item of toDelete) {
+      await verifyRowIntegrity(item);
+    }
+    // Phase 2: delete — all integrity checks passed
     for (const [sheetName, rows] of Object.entries(bySheet)) {
       const sheetId = await getSheetId(sheetName);
-      // Verify every row before deleting — aborts if any row has shifted
-      for (const item of toDelete.filter(i => i.sheetName === sheetName)) {
-        await verifyRowIntegrity(item);
-      }
-      // Sort descending so higher row indices delete first (avoids index shift)
+      if (sheetId === null) throw new Error(`No se encontró la hoja "${sheetName}" — sincronizá y reintentá.`);
+      // Sort descending so higher row indices delete first (avoids index shift within same sheet)
       const sortedDesc = rows.slice().sort((a,b)=>b-a);
-      // Send all deletes in a single batchUpdate request
       const requests = sortedDesc.map(row => ({ deleteDimension: {
         range: { sheetId, dimension: 'ROWS', startIndex: row - 1, endIndex: row }
       }}));
@@ -3454,20 +3482,29 @@ window.showPage = function(id) {
 // ═══════════════════════════════════════════════════════════════
 const LOG_SHEET = 'LOG';
 
+const LOG_HEADER = ['Timestamp','Usuario','Acción','Insumo','Catálogo','Lote','Detalle','Estado anterior'];
 async function ensureLogSheet() {
   const meta = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: SHEET_ID });
   const exists = meta.result.sheets.some(s => s.properties.title === LOG_SHEET);
-  if (exists) return;
-  await gapi.client.sheets.spreadsheets.batchUpdate({
-    spreadsheetId: SHEET_ID,
-    resource: { requests: [{ addSheet: { properties: { title: LOG_SHEET, gridProperties: { rowCount: 5000, columnCount: 7 } } } }] }
+  if (!exists) {
+    await gapi.client.sheets.spreadsheets.batchUpdate({
+      spreadsheetId: SHEET_ID,
+      resource: { requests: [{ addSheet: { properties: { title: LOG_SHEET, gridProperties: { rowCount: 5000, columnCount: 8 } } } }] }
+    });
+  }
+  // Always ensure header is up to date (handles migration from 7-col to 8-col)
+  const headerResp = await gapi.client.sheets.spreadsheets.values.get({
+    spreadsheetId: SHEET_ID, range: `${LOG_SHEET}!A1:H1`
   });
-  await gapi.client.sheets.spreadsheets.values.update({
-    spreadsheetId: SHEET_ID,
-    range: `${LOG_SHEET}!A1:H1`,
-    valueInputOption: 'USER_ENTERED',
-    resource: { values: [['Timestamp','Usuario','Acción','Insumo','Catálogo','Lote','Detalle','Estado anterior']] }
-  });
+  const currentHeader = headerResp.result.values?.[0] || [];
+  if (currentHeader.length < LOG_HEADER.length || currentHeader[7] !== LOG_HEADER[7]) {
+    await gapi.client.sheets.spreadsheets.values.update({
+      spreadsheetId: SHEET_ID,
+      range: `${LOG_SHEET}!A1:H1`,
+      valueInputOption: 'USER_ENTERED',
+      resource: { values: [LOG_HEADER] }
+    });
+  }
 }
 
 async function writeLog(accion, item, detalle = '', estadoAnterior = '') {
