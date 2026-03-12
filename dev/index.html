@@ -2015,10 +2015,14 @@ function calcDashErrores() {
   const MIN_YEAR = 2000, MAX_YEAR = hoy.getFullYear() + 10;
 
   // Frecuencias: por nombre → catálogo más común; por catálogo → nombre más común
+  // Excluir NA, vacíos — no tienen catálogo/nombre real y no deben agruparse
+  const isNA = v => !v || v.trim() === '' || v.trim().toUpperCase() === 'NA';
   const freqCatPorNombre = {}, freqNombrePorCat = {};
   for (const i of stock) {
-    const nom = i.nombre.trim(), cat = stripAI(i.catalogo).trim().toLowerCase();
-    if (nom && cat) {
+    const nom = i.nombre.trim();
+    const cat = stripAI(i.catalogo).trim().toLowerCase();
+    // Solo construir frecuencias si AMBOS son valores reales, no NA
+    if (nom && !isNA(nom) && cat && !isNA(cat)) {
       if (!freqCatPorNombre[nom]) freqCatPorNombre[nom] = {};
       freqCatPorNombre[nom][cat] = (freqCatPorNombre[nom][cat]||0) + 1;
       if (!freqNombrePorCat[cat]) freqNombrePorCat[cat] = {};
@@ -2042,24 +2046,34 @@ function calcDashErrores() {
       errLogico.push({ i, desc: `Fin ${fmtFecha(i.finConsumo)} anterior al inicio ${fmtFecha(i.inicioConsumo)}` });
       continue;
     }
-    // CATÁLOGO: distinto al más frecuente para este nombre
+    // Saltar checks de catálogo/nombre si el ítem tiene NA en cualquiera de los dos campos
     const nom = i.nombre.trim();
     const myCat = stripAI(i.catalogo).trim().toLowerCase();
-    if (nom && myCat && freqCatPorNombre[nom]) {
-      const [majCat, majCount] = majority(freqCatPorNombre[nom]);
-      const total = Object.values(freqCatPorNombre[nom]).reduce((a,b)=>a+b,0);
-      if (majCat !== myCat && majCount / total >= 0.7 && total >= 3) {
-        errCatalogo.push({ i, desc: `Cat. <strong>${htmlEsc(stripAI(i.catalogo))}</strong> — mayoría usa <strong>${htmlEsc(majCat)}</strong> (${majCount}/${total})` });
-        continue;
+    if (isNA(nom) || isNA(myCat)) continue;
+
+    // CATÁLOGO: distinto al más frecuente para este nombre
+    // Solo marca si el grupo tiene al menos 2 catálogos distintos (descarta insumos únicos)
+    if (freqCatPorNombre[nom]) {
+      const cats = freqCatPorNombre[nom];
+      if (Object.keys(cats).length >= 2) {
+        const [majCat, majCount] = majority(cats);
+        const total = Object.values(cats).reduce((a,b)=>a+b,0);
+        if (majCat !== myCat && majCount / total >= 0.7 && total >= 3) {
+          errCatalogo.push({ i, desc: `Cat. <strong>${htmlEsc(stripAI(i.catalogo))}</strong> — mayoría usa <strong>${htmlEsc(majCat)}</strong> (${majCount}/${total})` });
+          continue;
+        }
       }
     }
     // NOMBRE: distinto al más frecuente para este catálogo
-    const cat = stripAI(i.catalogo).trim().toLowerCase();
-    if (cat && nom && freqNombrePorCat[cat]) {
-      const [majNom, majCount] = majority(freqNombrePorCat[cat]);
-      const total = Object.values(freqNombrePorCat[cat]).reduce((a,b)=>a+b,0);
-      if (majNom !== nom && majCount / total >= 0.7 && total >= 3) {
-        errNombre.push({ i, desc: `Nombre diverge — mayoría cargada como <strong>${htmlEsc(majNom)}</strong>` });
+    // Solo marca si el grupo tiene al menos 2 nombres distintos (descarta insumos únicos)
+    if (freqNombrePorCat[myCat]) {
+      const noms = freqNombrePorCat[myCat];
+      if (Object.keys(noms).length >= 2) {
+        const [majNom, majCount] = majority(noms);
+        const total = Object.values(noms).reduce((a,b)=>a+b,0);
+        if (majNom !== nom && majCount / total >= 0.7 && total >= 3) {
+          errNombre.push({ i, desc: `Nombre diverge — mayoría cargada como <strong>${htmlEsc(majNom)}</strong>` });
+        }
       }
     }
   }
