@@ -1839,18 +1839,22 @@ function renderDashKPIs() {
 
 // ── Panel 1: Vencidos y por vencer ────────────────────────────
 function renderDashPanelVencidos() {
+  const hoy = Date.now();
+  const hace90 = hoy - 90 * 86400000;
   const items = stock
-    .filter(i => i._estado === 'vencido' || i._estado === 'vence')
+    .filter(i => {
+      if (i._estado === 'vence') return true;
+      if (i._estado === 'vencido') return i._vencTs && i._vencTs >= hace90;
+      return false;
+    })
     .sort((a,b) => {
-      // vencidos primero (ordenados por cuánto tiempo llevan vencidos, más antiguo primero)
-      // luego por vencer (más próximo primero)
+      // vencidos primero (más reciente primero), luego por vencer (más próximo primero)
       if (a._estado === 'vencido' && b._estado !== 'vencido') return -1;
       if (b._estado === 'vencido' && a._estado !== 'vencido') return 1;
       return (a._vencTs||0) - (b._vencTs||0);
     });
 
   document.getElementById('panel-count-venc').textContent = items.length + ' insumos';
-  const hoy = Date.now();
 
   document.getElementById('panel-vencidos').innerHTML = items.length
     ? items.map(i => {
@@ -1878,7 +1882,7 @@ function renderDashPanelProximos() {
   const hoy = Date.now();
   const limit = hoy + dashProxDays * 86400000;
   const items = stock
-    .filter(i => i._estado === 'vence' || (i._estado === 'disponible' && i._vencTs && i._vencTs > hoy && i._vencTs <= limit))
+    .filter(i => i._vencTs && i._vencTs > hoy && i._vencTs <= limit && i._estado !== 'baja')
     .sort((a,b) => (a._vencTs||0) - (b._vencTs||0));
 
   if (!items.length) {
