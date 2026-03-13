@@ -168,7 +168,7 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 
 /* BAJA SEARCH UNIFIED */
 .baja-search-wrap{position:relative}
-.baja-search-wrap .search-icon-abs{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none}
+.baja-search-wrap .search-icon-abs{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none;transition:opacity .15s}.baja-search-wrap .search-icon-abs.is-clear{pointer-events:all;cursor:pointer;color:var(--dim)}.baja-search-wrap .search-icon-abs.is-clear:hover{color:var(--text)}
 .baja-search-unified{width:100%;padding:10px 12px 10px 38px !important;border:1.5px solid var(--border);border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s,box-shadow .15s}
 .baja-search-unified:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-l)}
 .baja-match-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;flex-shrink:0}
@@ -201,7 +201,7 @@ mark{background:transparent;color:var(--accent);font-weight:700}
 .search-wrap{position:relative;width:100%}
 .search-input{width:100%;padding:11px 14px 11px 40px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'IBM Plex Sans',sans-serif;outline:none;transition:all .15s;background:var(--surface);color:var(--text)}
 .search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-l)}
-.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none;transition:opacity .15s}.search-icon.is-clear{pointer-events:all;cursor:pointer}.search-icon.is-clear:hover{color:var(--text)}
 .autocomplete-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow-lg);z-index:100;max-height:240px;overflow-y:auto;display:none}
 .autocomplete-list.show{display:block}
 .autocomplete-item{padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border2);transition:background .1s}
@@ -446,7 +446,7 @@ mark{background:transparent;color:var(--accent);font-weight:700}
 .fd-count-badge.show{display:inline-flex}
 .fd-search{width:100%;padding:8px 11px 8px 32px;border:1.5px solid var(--border);border-radius:8px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;outline:none;background:var(--surface);color:var(--text);transition:border-color .15s,box-shadow .15s}
 .fd-search:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-l)}
-.fd-search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none}
+.fd-search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none;transition:color .15s}.fd-search-icon.is-clear{pointer-events:all;cursor:pointer}.fd-search-icon.is-clear:hover{color:var(--text)}
 .fd-dropdown{position:absolute;top:calc(100%+4px);left:0;right:0;background:var(--surface);border:1.5px solid var(--accent);border-radius:8px;box-shadow:var(--shadow-lg);z-index:10;display:none;max-height:200px;overflow-y:auto}
 .fd-dropdown.show{display:block}
 .fd-drop-item{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border2);transition:background .1s;user-select:none}
@@ -2437,7 +2437,27 @@ function highlightMatch(str, query) {
   return s;
 }
 
+// ── Search icon ↔ clear-X toggle ──────────────────────────────
+function updateSearchIcon(inputEl, iconEl, clearFn) {
+  if (!inputEl || !iconEl) return;
+  const hasVal = inputEl.value.length > 0;
+  if (hasVal) {
+    iconEl.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>';
+    iconEl.classList.add('is-clear');
+    iconEl.onclick = () => { inputEl.value = ''; iconEl.innerHTML = '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>'; iconEl.classList.remove('is-clear'); iconEl.onclick = null; clearFn(); inputEl.focus(); };
+  } else {
+    iconEl.innerHTML = '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>';
+    iconEl.classList.remove('is-clear');
+    iconEl.onclick = null;
+  }
+}
+
 function buscarBaja() {
+  updateSearchIcon(
+    document.getElementById('baja-search-input'),
+    document.querySelector('.search-icon-abs'),
+    () => { buscarBaja(); }
+  );
   const q = document.getElementById('baja-search-input').value.trim();
   const list = document.getElementById('baja-list');
   const resultsEl = document.getElementById('baja-results');
@@ -2583,6 +2603,11 @@ function setFilter(f,btn) {
 }
 let _buscarTimer = null;
 function buscarConsulta() {
+  updateSearchIcon(
+    document.getElementById('consulta-input'),
+    document.querySelector('.search-icon'),
+    () => { consultaQuery = ''; renderConsulta(); }
+  );
   consultaQuery=document.getElementById('consulta-input').value.trim().toLowerCase();
   consultaPage = 0;
   renderACConsulta();
@@ -3747,6 +3772,11 @@ function fdGetSetKey(field) {
 }
 
 function fdSearchChips(field) {
+  const inputEl = document.getElementById(`fd-search-${field}`);
+  const iconEl  = inputEl?.previousElementSibling;
+  if (inputEl && iconEl && iconEl.classList.contains('fd-search-icon')) {
+    updateSearchIcon(inputEl, iconEl, () => { fdSearchChips(field); });
+  }
   const inp  = document.getElementById(`fd-search-${field}`);
   const drop = document.getElementById(`fd-drop-${field}`);
   if (!drop || !inp) return;
